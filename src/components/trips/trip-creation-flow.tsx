@@ -1,0 +1,56 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, CheckCircle2, ChevronRight, LoaderCircle, MapPin, MessageCircleHeart, Sparkles, Users } from "lucide-react";
+import type { BudgetTier, Region, TravelerType } from "@/lib/domain/types";
+import { createTrip, generateItinerary } from "@/lib/api";
+import { useTripStore } from "@/stores/trip-store";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+const partyOptions: { value: TravelerType; label: string }[] = [
+  { value: "SOLO", label: "Just me" }, { value: "COUPLE", label: "Two of us" }, { value: "FAMILY", label: "Family" }, { value: "FRIENDS", label: "Friends" },
+];
+const budgetOptions: { value: BudgetTier; label: string; note: string }[] = [
+  { value: "BUDGET", label: "Easy on the wallet", note: "Stay nimble" }, { value: "MID_RANGE", label: "Comfortable", note: "A little more room" }, { value: "LUXURY", label: "A proper treat", note: "Comfort first" },
+];
+
+export function TripCreationFlow({ regions, initialBrief = "", initialDestination }: { regions: Region[]; initialBrief?: string; initialDestination?: string }) {
+  const router = useRouter();
+  const applyItineraryEvent = useTripStore((state) => state.applyItineraryEvent);
+  const setTrip = useTripStore((state) => state.setTrip);
+  const [destination, setDestination] = useState(initialDestination && regions.some((region) => region.slug === initialDestination) ? initialDestination : regions[0]?.slug ?? "hunza");
+  const [brief, setBrief] = useState(initialBrief);
+  const [startDate, setStartDate] = useState("2026-09-15");
+  const [endDate, setEndDate] = useState("2026-09-19");
+  const [party, setParty] = useState<TravelerType>("FRIENDS");
+  const [budget, setBudget] = useState<BudgetTier>("MID_RANGE");
+  const [pace, setPace] = useState<"relaxed" | "balanced" | "packed">("balanced");
+  const [status, setStatus] = useState<"form" | "generating" | "error">("form");
+  const [error, setError] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [streamedDays, setStreamedDays] = useState<number[]>([]);
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (new Date(endDate) < new Date(startDate)) { setError("Choose an end date after your departure date."); setStatus("error"); return; }
+    setError(""); setStatus("generating"); setProgress(4); setStreamedDays([]);
+    try {
+      const selected = regions.find((region) => region.slug === destination);
+      const trip = await createTrip({ title: `${selected?.name ?? "Pakistan"} with Safar`, destination: selected?.name, regionSlug: destination, startDate: new Date(`${startDate}T09:00:00.000Z`).toISOString(), endDate: new Date(`${endDate}T18:00:00.000Z`).toISOString(), travelerType: party, budgetTier: budget, pace, partySize: party === "SOLO" ? 1 : party === "COUPLE" ? 2 : 4, vibe: brief || "A thoughtful, place-led escape" });
+      setTrip({ ...trip, days: [] });
+      const stream = await generateItinerary({ tripId: trip.id, regionSlug: destination, prompt: brief, destination: selected?.name, startDate: trip.startDate, endDate: trip.endDate, travelerType: party, budgetTier: budget, pace });
+      for await (const event of stream) {
+        applyItineraryEvent(event);
+        setProgress(event.progress);
+        if (event.type === "day") setStreamedDays((days) => [...days, event.day.dayNumber]);
+        if (event.type === "complete") router.push(`/trips/${event.trip.id}`);
+      }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "We couldn’t sketch that route. Please try again."); setStatus("error"); }
+  };
+
+  if (status === "generating") return <section className="paper-grain min-h-[72vh] px-4 py-16 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl"><div className="rounded-[2rem] bg-karakoram-ink p-7 text-sandstone-mist shadow-route-card sm:p-10"><Badge variant="marigold"><Sparkles size={13} /> Safar is planning</Badge><h1 className="display-type mt-5 text-4xl leading-tight">Finding the shape of your journey.</h1><p className="mt-3 text-sm leading-6 text-sandstone-mist/70">We’re checking the route against real places, seasonal fit and useful road context.</p><div className="mt-8 h-2 overflow-hidden rounded-full bg-white/12"><div className="h-full rounded-full bg-attabad-turquoise transition-all duration-500" style={{ width: `${progress}%` }} /></div><p className="mono-type mt-3 text-xs text-sandstone-mist/65">{progress}% · streaming one day at a time</p><ol className="mt-8 space-y-3">{[1, 2, 3, 4, 5].map((day) => <li key={day} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-sm"><span className="grid size-7 place-items-center rounded-full border border-white/20 text-xs">{streamedDays.includes(day) ? <CheckCircle2 className="text-truck-art-marigold" size={17} /> : day}</span><span className={streamedDays.includes(day) ? "text-sandstone-mist" : "text-sandstone-mist/48"}>{streamedDays.includes(day) ? `Day ${day} added to your Karakoram Line` : `Day ${day} is taking shape`}</span>{!streamedDays.includes(day) && day === streamedDays.length + 1 && <LoaderCircle className="ml-auto animate-spin text-attabad-turquoise" size={16} />}</li>)}</ol></div></div></section>;
+
+  return <section className="paper-grain min-h-[72vh] px-4 py-10 sm:px-6 sm:py-16 lg:px-8"><div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[.78fr_1.22fr]"><aside className="rounded-[1.5rem] bg-karakoram-ink p-6 text-sandstone-mist sm:p-8"><Badge variant="marigold">A conversation, not a form</Badge><h1 className="display-type mt-5 text-4xl leading-tight">Where is your next good story?</h1><p className="mt-4 text-sm leading-6 text-sandstone-mist/72">Give Safar a few signals. You’ll get a route built around actual places — along with the things worth knowing before you go.</p><div className="mt-8 space-y-5"><div className="flex gap-3"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-attabad-turquoise text-sm font-bold">1</span><p className="text-sm leading-6 text-sandstone-mist/78"><strong className="text-sandstone-mist">We listen.</strong><br />Destination, dates, companions and what you’re chasing.</p></div><div className="flex gap-3"><span className="grid size-8 shrink-0 place-items-center rounded-full border border-white/25 text-sm font-bold">2</span><p className="text-sm leading-6 text-sandstone-mist/78"><strong className="text-sandstone-mist">We ground the plan.</strong><br />Your itinerary starts with a curated Pakistan place database.</p></div><div className="flex gap-3"><span className="grid size-8 shrink-0 place-items-center rounded-full border border-white/25 text-sm font-bold">3</span><p className="text-sm leading-6 text-sandstone-mist/78"><strong className="text-sandstone-mist">You make it yours.</strong><br />Edit every stop with Safar once the route appears.</p></div></div></aside><form onSubmit={submit} className="rounded-[1.5rem] border border-karakoram-ink/12 bg-white p-5 shadow-sm sm:p-8"><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-xl bg-attabad-turquoise/12 text-attabad-turquoise"><MessageCircleHeart size={20} /></span><div><p className="font-bold">Let’s begin</p><p className="text-xs text-karakoram-ink/60">You can change every detail later.</p></div></div><div className="mt-8"><label htmlFor="brief" className="text-sm font-bold text-karakoram-ink">What does this trip feel like?</label><textarea id="brief" value={brief} onChange={(event) => setBrief(event.target.value)} className="mt-2 min-h-24 w-full rounded-xl border border-karakoram-ink/15 bg-sandstone-mist/45 p-3 text-sm leading-6 outline-none transition focus:border-attabad-turquoise focus:ring-2 focus:ring-attabad-turquoise/20" placeholder="A few words are enough — quiet valleys, good food, a family road trip…" /></div><div className="mt-6 grid gap-5 sm:grid-cols-2"><div><label htmlFor="destination" className="text-sm font-bold">Where are we going?</label><div className="relative mt-2"><MapPin className="pointer-events-none absolute left-3 top-3 text-attabad-turquoise" size={17} /><select id="destination" value={destination} onChange={(event) => setDestination(event.target.value)} className="w-full appearance-none rounded-xl border border-karakoram-ink/15 bg-white py-3 pl-9 pr-3 text-sm outline-none focus:border-attabad-turquoise">{regions.map((region) => <option key={region.id} value={region.slug}>{region.name}</option>)}</select></div></div><div><p className="text-sm font-bold">Who is coming?</p><div className="mt-2 grid grid-cols-2 gap-2">{partyOptions.map((option) => <button key={option.value} type="button" onClick={() => setParty(option.value)} className={`rounded-xl border px-3 py-2 text-left text-xs font-semibold transition ${party === option.value ? "border-attabad-turquoise bg-attabad-turquoise/10 text-attabad-turquoise" : "border-karakoram-ink/14 hover:border-karakoram-ink/35"}`}>{option.label}</button>)}</div></div><div><label htmlFor="start" className="text-sm font-bold">Leaving</label><input id="start" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className="mt-2 w-full rounded-xl border border-karakoram-ink/15 px-3 py-3 text-sm outline-none focus:border-attabad-turquoise" /></div><div><label htmlFor="end" className="text-sm font-bold">Coming back</label><input id="end" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className="mt-2 w-full rounded-xl border border-karakoram-ink/15 px-3 py-3 text-sm outline-none focus:border-attabad-turquoise" /></div></div><fieldset className="mt-6"><legend className="text-sm font-bold">What’s the comfort level?</legend><div className="mt-2 grid gap-2 sm:grid-cols-3">{budgetOptions.map((option) => <button key={option.value} type="button" onClick={() => setBudget(option.value)} className={`rounded-xl border p-3 text-left transition ${budget === option.value ? "border-attabad-turquoise bg-attabad-turquoise/10" : "border-karakoram-ink/14 hover:border-karakoram-ink/35"}`}><span className="block text-xs font-bold">{option.label}</span><span className="mt-1 block text-[11px] text-karakoram-ink/60">{option.note}</span></button>)}</div></fieldset><fieldset className="mt-6"><legend className="text-sm font-bold">How full should the days feel?</legend><div className="mt-2 flex flex-wrap gap-2">{(["relaxed", "balanced", "packed"] as const).map((option) => <button key={option} type="button" onClick={() => setPace(option)} className={`rounded-full border px-4 py-2 text-xs font-bold capitalize transition ${pace === option ? "border-attabad-turquoise bg-attabad-turquoise text-white" : "border-karakoram-ink/14 text-karakoram-ink/70"}`}>{option}</button>)}</div></fieldset>{status === "error" && <p role="alert" className="mt-5 rounded-xl bg-alert-red/10 p-3 text-sm text-alert-red">{error}</p>}<Button type="submit" className="mt-8 w-full">Create my route <ArrowRight size={17} /></Button><p className="mt-3 text-center text-xs leading-5 text-karakoram-ink/52">Travel information is advisory. Safar will flag season, permit and road context in your itinerary.</p></form></div></section>;
+}

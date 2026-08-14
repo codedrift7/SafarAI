@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #12232b;
+  --turquoise: #1c8299;
+  --marigold: #f2a93b;
+  --magenta: #d6336c;
+  --meadow: #3e7c58;
+  --sandstone: #f1ecdf;
+  --alert: #c0392b;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  min-height: 100vh;
+  background: var(--sandstone);
+  color: var(--ink);
+  font-family: var(--font-inter), Inter, Arial, sans-serif;
+}
+
+::selection { background: var(--marigold); color: var(--ink); }
+
+button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+
+:focus-visible {
+  outline: 3px solid var(--marigold);
+  outline-offset: 3px;
+}
+
+.display-type { font-family: var(--font-fraunces), Georgia, serif; }
+.mono-type { font-family: var(--font-mono), ui-monospace, monospace; }
+
+.paper-grain {
+  background-image: radial-gradient(rgba(18, 35, 43, 0.05) 0.65px, transparent 0.65px);
+  background-size: 7px 7px;
+}
+
+.lattice {
+  background-color: rgba(242, 169, 59, 0.08);
+  background-image:
+    linear-gradient(30deg, rgba(242, 169, 59, 0.22) 12%, transparent 12.5%, transparent 87%, rgba(242, 169, 59, 0.22) 87.5%, rgba(242, 169, 59, 0.22)),
+    linear-gradient(150deg, rgba(242, 169, 59, 0.22) 12%, transparent 12.5%, transparent 87%, rgba(242, 169, 59, 0.22) 87.5%, rgba(242, 169, 59, 0.22));
+  background-size: 44px 76px;
+}
+
+.route-dash {
+  stroke-dasharray: 8 8;
+  stroke-linecap: round;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
