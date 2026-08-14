@@ -64,6 +64,20 @@ function findActivity(activityId: string): { trip: Trip; day: TripDay; activity:
   return null;
 }
 
+/**
+ * The itinerary view only ever has a day's id in hand (not its parent
+ * trip's id) when it asks to reorder — see trip-itinerary.tsx's
+ * `reorderActivities(activeDay.id, ids)` call. Resolve the owning trip from
+ * the day id instead of requiring the caller to pass both.
+ */
+function findTripDay(dayId: string): { trip: Trip; day: TripDay } | null {
+  for (const trip of getStore().trips) {
+    const day = trip.days.find((candidate) => candidate.id === dayId);
+    if (day) return { trip, day };
+  }
+  return null;
+}
+
 export async function listTrips(filters: TripFilters = {}): Promise<Trip[]> {
   await delay();
   return getStore()
@@ -260,15 +274,20 @@ export async function deleteActivity(id: string): Promise<void> {
   found.trip.updatedAt = now();
 }
 
+/**
+ * NOTE: signature is (dayId, orderedActivityIds) — no tripId — because
+ * trip-itinerary.tsx only ever has the active day's id on hand when it
+ * calls this after a drag/reorder. The owning trip is resolved internally
+ * via findTripDay.
+ */
 export async function reorderActivities(
-  tripId: string,
   dayId: string,
   orderedActivityIds: string[],
 ): Promise<TripDay> {
   await delay();
-  const trip = getRequiredRawTrip(tripId);
-  const day = trip.days.find((candidate) => candidate.id === dayId);
-  if (!day) throw new Error(`Trip day '${dayId}' was not found.`);
+  const found = findTripDay(dayId);
+  if (!found) throw new Error(`Trip day '${dayId}' was not found.`);
+  const { trip, day } = found;
   if (
     orderedActivityIds.length !== day.activities.length ||
     new Set(orderedActivityIds).size !== day.activities.length ||

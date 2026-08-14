@@ -1,4 +1,6 @@
 import type { Activity, Advisory, POI, Season, Trip } from "@/lib/domain/types";
+import { getRawPoi } from "./store";
+import { delay } from "./utils";
 
 export function seasonForDate(value: string): Season {
   const month = new Date(value).getUTCMonth() + 1;
@@ -143,4 +145,23 @@ export function getTripAdvisories(trip: Trip): Advisory[] {
       getActivityAdvisories(activity, trip.startDate, trip.endDate),
     ),
   );
+}
+
+/**
+ * The POI detail page (src/app/pois/[slug]/page.tsx) calls
+ * `getPOIAdvisories(poi.id)` — an id-based, Promise-returning helper that
+ * isn't scoped to any one trip's dates. This never existed; only the
+ * trip-dates-aware `getPoiAdvisories(poi, startDate, endDate)` did.
+ *
+ * Reuses that same logic across a full-year reference window so every
+ * season is "in range" and the seasonal-mismatch advisory — which only
+ * means something against real trip dates — never fires here. Permit,
+ * road-condition, altitude and safety-note advisories still do, which is
+ * exactly what a standalone place page should show.
+ */
+export async function getPOIAdvisories(poiId: string): Promise<Advisory[]> {
+  await delay();
+  const poi = getRawPoi(poiId);
+  if (!poi) return [];
+  return getPoiAdvisories(poi, "2026-01-01T00:00:00.000Z", "2026-12-31T00:00:00.000Z");
 }
