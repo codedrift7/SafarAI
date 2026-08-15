@@ -1,0 +1,275 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TravelerType {
+  SOLO
+  COUPLE
+  FAMILY
+  FRIENDS
+  RELIGIOUS
+  BUSINESS
+}
+
+enum BudgetTier {
+  BUDGET
+  MID_RANGE
+  LUXURY
+}
+
+enum TripStatus {
+  DRAFT
+  PLANNING
+  CONFIRMED
+  COMPLETED
+  ARCHIVED
+}
+
+enum CollaboratorRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+enum POICategory {
+  MOUNTAIN
+  LAKE
+  FORT
+  MOSQUE
+  SHRINE
+  MUSEUM
+  BAZAAR
+  WATERFALL
+  NATIONAL_PARK
+  HILL_STATION
+  VALLEY
+  GLACIER
+  ARCHAEOLOGICAL_SITE
+  CITY_LANDMARK
+  RESTAURANT
+  VIEWPOINT
+}
+
+enum RoadCondition {
+  PAVED
+  UNPAVED
+  FOUR_WD_REQUIRED
+  SEASONAL_CLOSURE
+}
+
+enum Season {
+  SPRING
+  SUMMER
+  AUTUMN
+  WINTER
+}
+
+enum ActivityCategory {
+  SIGHTSEEING
+  FOOD
+  TRANSPORT
+  LODGING
+  REST
+  ADVENTURE
+  SHOPPING
+  RELIGIOUS
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?
+  authProvider String   @default("email")
+  name         String
+  homeCountry  String?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  trips          Trip[]
+  collaborations TripCollaborator[]
+  savedPlaces    SavedPlace[]
+  votes          ActivityVote[]
+}
+
+model Trip {
+  id            String      @id @default(cuid())
+  ownerId       String
+  owner         User        @relation(fields: [ownerId], references: [id])
+  title         String
+  slug          String      @unique
+  startDate     DateTime
+  endDate       DateTime
+  travelerType  TravelerType
+  budgetTier    BudgetTier?
+  pace          String      @default("balanced")
+  status        TripStatus  @default(DRAFT)
+  coverImageUrl String?
+  isPublic      Boolean     @default(false)
+  shareToken    String?     @unique
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  days          TripDay[]
+  collaborators TripCollaborator[]
+  chatMessages  ChatMessage[]
+}
+
+model TripCollaborator {
+  id           String           @id @default(cuid())
+  tripId       String
+  trip         Trip             @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  userId       String?
+  user         User?            @relation(fields: [userId], references: [id])
+  invitedEmail String?
+  role         CollaboratorRole @default(EDITOR)
+  joinedAt     DateTime?
+  createdAt    DateTime         @default(now())
+
+  @@unique([tripId, userId])
+}
+
+model TripDay {
+  id        String   @id @default(cuid())
+  tripId    String
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  dayNumber Int
+  date      DateTime
+  regionId  String?
+  region    Region?  @relation(fields: [regionId], references: [id])
+  notes     String?
+
+  activities Activity[]
+
+  @@unique([tripId, dayNumber])
+}
+
+model Activity {
+  id            String           @id @default(cuid())
+  tripDayId     String
+  tripDay       TripDay          @relation(fields: [tripDayId], references: [id], onDelete: Cascade)
+  poiId         String?
+  poi           POI?             @relation(fields: [poiId], references: [id])
+  customTitle   String?
+  category      ActivityCategory
+  startTime     String?
+  endTime       String?
+  orderIndex    Int
+  notes         String?
+  estimatedCost Float?
+  costCurrency  String           @default("PKR")
+  addedByUserId String?
+
+  votes ActivityVote[]
+}
+
+model ActivityVote {
+  id         String   @id @default(cuid())
+  activityId String
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([activityId, userId])
+}
+
+model Region {
+  id              String   @id @default(cuid())
+  name            String
+  province        String
+  slug            String   @unique
+  description     String?
+  heroImageUrl    String?
+  bestSeasons     Season[]
+  typicalTripDays Int?
+
+  pois      POI[]
+  tripDays  TripDay[]
+  templates TripTemplate[]
+}
+
+model POI {
+  id              String        @id @default(cuid())
+  name            String
+  slug            String        @unique
+  regionId        String
+  region          Region        @relation(fields: [regionId], references: [id])
+  category        POICategory
+  latitude        Float
+  longitude       Float
+  description     String?
+  bestSeasons     Season[]
+  altitudeMeters  Int?
+  requiresPermit  Boolean       @default(false)
+  permitAuthority String?
+  permitNotes     String?
+  roadCondition   RoadCondition @default(PAVED)
+  avgVisitHours   Float?
+  entryFeePkr     Float?
+  safetyNotes     String?
+  googlePlaceId   String?
+  photos          String[]
+  source          String?
+  verifiedAt      DateTime?
+
+  activities Activity[]
+  savedBy    SavedPlace[]
+
+  @@index([regionId, category])
+}
+
+model TripTemplate {
+  id            String      @id @default(cuid())
+  title         String
+  regionId      String
+  region        Region      @relation(fields: [regionId], references: [id])
+  durationDays  Int
+  tags          String[]
+  priceTier     BudgetTier?
+  coverImageUrl String?
+  description   String
+  itineraryJson Json
+  usageCount    Int         @default(0)
+}
+
+model SavedPlace {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  poiId     String
+  poi       POI      @relation(fields: [poiId], references: [id])
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, poiId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  tripId    String
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  role      String
+  content   String
+  toolCalls Json?
+  createdAt DateTime @default(now())
+}
+
+model VisaGuide {
+  id                String   @id @default(cuid())
+  nationalityCode   String   @unique
+  evisaAvailable    Boolean
+  visaFreeStay      Boolean  @default(false)
+  feeUsdMin         Float?
+  feeUsdMax         Float?
+  processingDaysMin Int?
+  processingDaysMax Int?
+  notes             String?
+  officialLink      String   @default("https://visa.nadra.gov.pk")
+  lastVerifiedAt    DateTime
+}

@@ -1,14 +1,62 @@
-/** Small, deterministic-ish latency so mocked calls behave like real I/O. */
-export function delay(milliseconds = 110): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+const defaultBaseUrl =
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.CLIENT_URL ||
+  "http://localhost:3000";
+
+export function apiUrl(path: string): string {
+  if (typeof window !== "undefined") return path;
+  return `${defaultBaseUrl}${path}`;
 }
 
-/**
- * DTOs contain plain data only. JSON cloning prevents a component from
- * accidentally mutating the in-memory repository by holding a return value.
- */
-export function clone<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T;
+export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(apiUrl(path), {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(init?.headers ?? {}),
+    },
+    cache: "no-store",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(body?.error || `Request failed: ${response.status}`);
+  }
+
+  return (await response.json()) as T;
+}
+
+export async function* parseSse<T>(response: Response): AsyncGenerator<T> {
+  if (!response.ok || !response.body) {
+    const body = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(body?.error || `Request failed: ${response.status}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const chunks = buffer.split("\n\n");
+    buffer = chunks.pop() || "";
+
+    for (const chunk of chunks) {
+      const line = chunk
+        .split("\n")
+        .map((value) => value.trim())
+        .find((value) => value.startsWith("data:"));
+
+      if (!line) continue;
+      const payload = line.replace(/^data:\s*/, "");
+      if (!payload) continue;
+      yield JSON.parse(payload) as T;
+    }
+  }
 }
 
 export function slugify(value: string): string {

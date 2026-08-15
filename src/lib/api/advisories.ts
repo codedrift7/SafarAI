@@ -1,6 +1,5 @@
 import type { Activity, Advisory, POI, Season, Trip } from "@/lib/domain/types";
-import { getRawPoi } from "./store";
-import { delay } from "./utils";
+import { listPOIs } from "./catalog";
 
 export function seasonForDate(value: string): Season {
   const month = new Date(value).getUTCMonth() + 1;
@@ -160,8 +159,8 @@ export function getTripAdvisories(trip: Trip): Advisory[] {
  * exactly what a standalone place page should show.
  */
 export async function getPOIAdvisories(poiId: string): Promise<Advisory[]> {
-  await delay();
-  const poi = getRawPoi(poiId);
+  const pois = await listPOIs({});
+  const poi = pois.find((item) => item.id === poiId);
   if (!poi) return [];
   return getPoiAdvisories(poi, "2026-01-01T00:00:00.000Z", "2026-12-31T00:00:00.000Z");
 }
