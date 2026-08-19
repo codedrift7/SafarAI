@@ -15,6 +15,13 @@ interface PlannerInput {
   candidatePois: POI[];
 }
 
+export class ItineraryGenerationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ItineraryGenerationError";
+  }
+}
+
 function candidateSummary(candidatePois: POI[]): string {
   return candidatePois
     .map(
@@ -32,6 +39,25 @@ function systemPrompt(): string {
     "If suggesting non-verified stop, set poiId to null and provide customTitle.",
     "If POI requiresPermit=true, include caution note in note.",
   ].join(" ");
+}
+
+type ParseResult =
+  | { success: true; data: GeneratedItineraryArgs }
+  | { success: false; errorSummary: string };
+
+function parseAndValidate(argsRaw: string): ParseResult {
+  let json: unknown;
+  try {
+    json = JSON.parse(argsRaw);
+  } catch {
+    return { success: false, errorSummary: "response was not valid JSON" };
+  }
+  const parsed = generateItinerarySchema.safeParse(json);
+  if (parsed.success) return { success: true, data: parsed.data };
+  return {
+    success: false,
+    errorSummary: parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; "),
+  };
 }
 
 export async function generateItineraryWithRetry(input: PlannerInput): Promise<GeneratedItineraryArgs> {
@@ -56,8 +82,8 @@ export async function generateItineraryWithRetry(input: PlannerInput): Promise<G
 
   const firstToolCall = first.choices[0]?.message?.tool_calls?.[0];
   const firstArgsRaw = firstToolCall?.function?.arguments ?? "{}";
-  const firstParsed = generateItinerarySchema.safeParse(JSON.parse(firstArgsRaw));
-  if (firstParsed.success) return firstParsed.data;
+  const firstResult = parseAndValidate(firstArgsRaw);
+  if (firstResult.success) return firstResult.data;
 
   const second = await groqClient.chat.completions.create({
     model: env.GROQ_MODEL_GENERATION,
@@ -71,9 +97,7 @@ export async function generateItineraryWithRetry(input: PlannerInput): Promise<G
       },
       {
         role: "user",
-        content: `Retry and match schema exactly. Errors: ${firstParsed.error.issues
-          .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-          .join("; ")}`,
+        content: `Retry and match schema exactly. Errors: ${firstResult.errorSummary}`,
       },
     ],
     tools: toolDefinitions as any,
@@ -83,10 +107,19 @@ export async function generateItineraryWithRetry(input: PlannerInput): Promise<G
 
   const secondToolCall = second.choices[0]?.message?.tool_calls?.[0];
   const secondArgsRaw = secondToolCall?.function?.arguments ?? "{}";
-  const secondParsed = generateItinerarySchema.safeParse(JSON.parse(secondArgsRaw));
-  if (secondParsed.success) return secondParsed.data;
+  const secondResult = parseAndValidate(secondArgsRaw);
+  if (secondResult.success) return secondResult.data;
 
-  throw new Error("Model output failed schema validation after retry.");
+  throw new ItineraryGenerationError(
+    `Model output failed schema validation after retry: ${secondResult.errorSummary}`,
+  );
+}
+
+function chatSystemPrompt(): string {
+  return [
+    "Choose exactly one tool call to edit the itinerary.",
+    "For swap_activity, replacementCriteria must be exactly one of the POI category values defined in that tool's schema — map the user's natural-language request (e.g. 'something outdoors', 'more food nearby') onto the single closest category. Do not invent a value outside that list.",
+  ].join(" ");
 }
 
 export async function chatToolCall(input: {
@@ -96,7 +129,7 @@ export async function chatToolCall(input: {
   const completion = await groqClient.chat.completions.create({
     model: env.GROQ_MODEL_CHAT,
     messages: [
-      { role: "system", content: "Choose exactly one tool call to edit itinerary." },
+      { role: "system", content: chatSystemPrompt() },
       { role: "user", content: `${input.context}\n${input.instruction}` },
     ],
     tools: chatToolDefinitions as any,

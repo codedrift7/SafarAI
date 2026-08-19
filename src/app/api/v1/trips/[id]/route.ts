@@ -1,9 +1,11 @@
+// src/app/api/v1/trips/[id]/route.ts
 import { prisma } from "@/server/db";
-import { jsonError, jsonOk } from "@/server/http";
+import { jsonOk } from "@/server/http";
 import { parseJson } from "@/server/route-utils";
 import { updateTripSchema } from "@/server/validators";
 import { toTrip } from "@/server/serialize";
-import { tripInclude } from "@/server/trip-service";
+import { requireTripAccess, tripInclude } from "@/server/trip-service";
+import { requireAuth } from "@/server/auth";
 
 function slugify(value: string): string {
   return value
@@ -15,23 +17,28 @@ function slugify(value: string): string {
 }
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAuth();
+  if (!auth.ok) return auth.response;
   const { id } = await params;
-  const trip = await prisma.trip.findFirst({
-    where: { OR: [{ id }, { slug: id }] },
-    include: tripInclude,
-  });
-  if (!trip) return jsonError("Trip not found", 404);
-  return jsonOk(toTrip(trip));
+
+  const access = await requireTripAccess(id, auth.payload.sub);
+  if (!access.ok) return access.response;
+
+  return jsonOk(toTrip(access.trip));
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const parsed = await parseJson(request, updateTripSchema);
-  if (!parsed.ok) return parsed.response;
+  const auth = await requireAuth();
+  if (!auth.ok) return auth.response;
   const { id } = await params;
 
-  const existing = await prisma.trip.findFirst({ where: { OR: [{ id }, { slug: id }] } });
-  if (!existing) return jsonError("Trip not found", 404);
+  const access = await requireTripAccess(id, auth.payload.sub, "EDITOR");
+  if (!access.ok) return access.response;
 
+  const parsed = await parseJson(request, updateTripSchema);
+  if (!parsed.ok) return parsed.response;
+
+  const existing = access.trip;
   const shouldPublish = parsed.data.isPublic === true;
   const nextShareToken =
     parsed.data.shareToken !== undefined
@@ -61,9 +68,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAuth();
+  if (!auth.ok) return auth.response;
   const { id } = await params;
-  const existing = await prisma.trip.findFirst({ where: { OR: [{ id }, { slug: id }] } });
-  if (!existing) return jsonError("Trip not found", 404);
-  await prisma.trip.delete({ where: { id: existing.id } });
+
+  const access = await requireTripAccess(id, auth.payload.sub, "OWNER");
+  if (!access.ok) return access.response;
+
+  await prisma.trip.delete({ where: { id: access.trip.id } });
   return jsonOk({ ok: true });
 }

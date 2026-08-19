@@ -8,6 +8,7 @@ export async function getCandidatePois(params: {
   startDate: Date;
   endDate: Date;
   categoryMix?: string[];
+  excludePermitRequired?: boolean;
 }) {
   const seasons = seasonsForRange(params.startDate, params.endDate);
   const where: any = {
@@ -26,6 +27,9 @@ export async function getCandidatePois(params: {
   }
   if (params.categoryMix?.length) {
     where.category = { in: params.categoryMix };
+  }
+  if (params.excludePermitRequired) {
+    where.requiresPermit = false;
   }
 
   return prisma.pOI.findMany({

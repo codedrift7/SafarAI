@@ -15,8 +15,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${inter.variable} ${mono.variable}`}>
-      <body>
+    <html lang="en" className={`${fraunces.variable} ${inter.variable} ${mono.variable}`} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <SiteHeader />
         <main>{children}</main>
         <SiteFooter />

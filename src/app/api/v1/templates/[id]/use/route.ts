@@ -4,6 +4,7 @@ import { parseJson } from "@/server/route-utils";
 import { useTemplateSchema } from "@/server/validators";
 import { tripInclude } from "@/server/trip-service";
 import { toTrip } from "@/server/serialize";
+import { requireAuth } from "@/server/auth";
 
 function slugify(value: string): string {
   return value
@@ -15,6 +16,9 @@ function slugify(value: string): string {
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAuth();
+  if (!auth.ok) return auth.response;
+
   const parsed = await parseJson(request, useTemplateSchema);
   if (!parsed.ok) return parsed.response;
 
@@ -22,15 +26,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const template = await prisma.tripTemplate.findUnique({ where: { id } });
   if (!template) return jsonError("Template not found", 404);
 
-  const owner = await prisma.user.findFirst();
-  if (!owner) return jsonError("No user available", 401);
-
   const startDate = parsed.data.startDate ? new Date(parsed.data.startDate) : new Date();
   const days = ((template.itineraryJson as any)?.days ?? []) as any[];
 
   const trip = await prisma.trip.create({
     data: {
-      ownerId: owner.id,
+      ownerId: auth.payload.sub,
       title: parsed.data.title || template.title,
       slug: `${slugify(parsed.data.title || template.title)}-${Date.now().toString(36)}`,
       startDate,

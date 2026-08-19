@@ -17,7 +17,7 @@ export const itineraryActivitySchema = z.object({
   ]),
   startTime: z.string().regex(timeRegex),
   endTime: z.string().regex(timeRegex),
-  note: z.string().optional().default(""),
+  note: z.string().nullable().optional().default(""),
 });
 
 export const itineraryDaySchema = z.object({
@@ -70,7 +70,7 @@ export const toolDefinitions = [
                       },
                       startTime: { type: "string", pattern: "^([01]\\d|2[0-3]):[0-5]\\d$" },
                       endTime: { type: "string", pattern: "^([01]\\d|2[0-3]):[0-5]\\d$" },
-                      note: { type: "string" },
+                      note: { type: ["string", "null"] },
                     },
                     required: ["category", "startTime", "endTime"],
                   },
@@ -161,7 +161,29 @@ export const chatToolDefinitions = [
         type: "object",
         properties: {
           activityId: { type: "string" },
-          replacementCriteria: { type: "string" },
+          replacementCriteria: {
+            type: "string",
+            enum: [
+              "MOUNTAIN",
+              "LAKE",
+              "FORT",
+              "MOSQUE",
+              "SHRINE",
+              "MUSEUM",
+              "BAZAAR",
+              "WATERFALL",
+              "NATIONAL_PARK",
+              "HILL_STATION",
+              "VALLEY",
+              "GLACIER",
+              "ARCHAEOLOGICAL_SITE",
+              "CITY_LANDMARK",
+              "RESTAURANT",
+              "VIEWPOINT",
+            ],
+            description:
+              "The POI category that best matches what the user wants instead. Map the user's natural-language request (e.g. 'something outdoors', 'more food nearby') onto the single closest category from this list.",
+          },
         },
         required: ["activityId", "replacementCriteria"],
       },

@@ -1,8 +1,10 @@
+// src/server/auth.ts
 import argon2 from "argon2";
 import { SignJWT, jwtVerify } from "jose";
 import type { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { env } from "./env";
+import { jsonError } from "@/server/http";
 
 const accessSecret = new TextEncoder().encode(env.JWT_ACCESS_SECRET);
 const refreshSecret = new TextEncoder().encode(env.JWT_REFRESH_SECRET);
@@ -13,6 +15,10 @@ export interface AuthTokenPayload {
   provider: string;
   type: "access" | "refresh";
 }
+
+export type AuthResult =
+  | { ok: true; payload: AuthTokenPayload }
+  | { ok: false; response: NextResponse };
 
 export async function hashPassword(password: string): Promise<string> {
   return argon2.hash(password);
@@ -70,12 +76,51 @@ export function clearAuthCookies(response: NextResponse): void {
   response.cookies.set("safar_refresh", "", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 0 });
 }
 
-export async function getCurrentUserPayload(req?: NextRequest): Promise<AuthTokenPayload | null> {
-  const access = req?.cookies.get("safar_access")?.value ?? (await cookies()).get("safar_access")?.value;
-  if (!access) return null;
+export async function getCurrentUserPayload(
+  req?: NextRequest,
+): Promise<AuthTokenPayload | null> {
+  const cookieStore = await cookies();
+
+  const access =
+    req?.cookies.get("safar_access")?.value ??
+    cookieStore.get("safar_access")?.value;
+
+  const refresh =
+    req?.cookies.get("safar_refresh")?.value ??
+    cookieStore.get("safar_refresh")?.value;
+
+  // 1. Try the normal access token first.
+  if (access) {
+    try {
+      return await verifyAccessToken(access);
+    } catch {
+      // Access token expired/invalid.
+      // Continue to refresh-token fallback.
+    }
+  }
+
+  // 2. Fall back to the refresh token.
+  if (!refresh) return null;
+
   try {
-    return await verifyAccessToken(access);
+    return await verifyRefreshToken(refresh);
   } catch {
     return null;
   }
+}
+
+/**
+ * Gate for Route Handlers. Resolves the current session, or returns a ready-to-return
+ * 401 Response if there isn't one — so callers never have to fall back to a default user.
+ *
+ *   const auth = await requireAuth();
+ *   if (!auth.ok) return auth.response;
+ *   // auth.payload.sub is the authenticated user's id
+ */
+export async function requireAuth(req?: NextRequest): Promise<AuthResult> {
+  const payload = await getCurrentUserPayload(req);
+  if (!payload) {
+    return { ok: false, response: jsonError("Unauthorized", 401) };
+  }
+  return { ok: true, payload };
 }

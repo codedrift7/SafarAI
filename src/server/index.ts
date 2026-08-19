@@ -1,4 +1,3 @@
-import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -12,7 +11,22 @@ async function bootstrap() {
   await app.prepare();
 
   const server = express();
-  server.use(helmet());
+  server.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+          "img-src": ["'self'", "data:", "https://images.unsplash.com"],
+          // Next's dev-mode webpack HMR relies on eval() for source maps, which the default
+          // script-src 'self' (no 'unsafe-eval') blocks. Production doesn't need this — Next
+          // serves all production JS as same-origin <script src> chunks, already covered by 'self'.
+          "script-src": dev
+            ? ["'self'", "'unsafe-eval'", "'unsafe-inline'"]
+            : ["'self'"],
+        },
+      },
+    }),
+  );
   server.use(cors({ origin: env.CLIENT_URL, credentials: true }));
 
   server.all("*", (req, res) => {

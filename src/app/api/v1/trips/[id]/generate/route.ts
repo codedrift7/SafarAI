@@ -3,11 +3,12 @@ import { jsonError } from "@/server/http";
 import { parseJson } from "@/server/route-utils";
 import { generateSchema } from "@/server/validators";
 import { toTrip } from "@/server/serialize";
-import { tripInclude } from "@/server/trip-service";
+import { tripInclude, requireTripAccess } from "@/server/trip-service";
 import { getCandidatePois } from "@/server/candidates";
 import { enforceRateLimit } from "@/server/rate-limit";
-import { generateItineraryWithRetry } from "@/lib/ai/planner";
+import { generateItineraryWithRetry, ItineraryGenerationError } from "@/lib/ai/planner";
 import { poiAdvisories } from "@/server/advisories";
+import { requireAuth } from "@/server/auth";
 
 function sseMessage(data: unknown): string {
   return `data: ${JSON.stringify(data)}\n\n`;
@@ -17,12 +18,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const allowed = await enforceRateLimit("ai:generate:global", 30, 60);
   if (!allowed) return jsonError("AI generation rate limit exceeded", 429);
 
-  const parsed = await parseJson(request, generateSchema);
-  if (!parsed.ok) return parsed.response;
+  const auth = await requireAuth();
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
-  const trip = await prisma.trip.findFirst({ where: { OR: [{ id }, { slug: id }] }, include: { days: true } });
-  if (!trip) return jsonError("Trip not found", 404);
+  const access = await requireTripAccess(id, auth.payload.sub, "EDITOR");
+  if (!access.ok) return access.response;
+  const trip = access.trip;
+
+  const parsed = await parseJson(request, generateSchema);
+  if (!parsed.ok) return parsed.response;
 
   const startDate = parsed.data.startDate ? new Date(parsed.data.startDate) : trip.startDate;
   const endDate = parsed.data.endDate ? new Date(parsed.data.endDate) : trip.endDate;
@@ -41,44 +46,55 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return jsonError("No candidate POIs available for this trip window", 422);
   }
 
-  const modelResult = await generateItineraryWithRetry({
-    userPrompt: parsed.data.prompt || parsed.data.destination || "Build a grounded itinerary",
-    todayIso: new Date().toISOString(),
-    tripDateRange: `${startDate.toISOString()}..${endDate.toISOString()}`,
-    candidatePois: candidates.map((poi) => ({
-      id: poi.id,
-      name: poi.name,
-      slug: poi.slug,
-      regionId: poi.regionId,
-      region: {
-        id: poi.region.id,
-        name: poi.region.name,
-        province: poi.region.province,
-        slug: poi.region.slug,
-        description: poi.region.description,
-        heroImageUrl: poi.region.heroImageUrl,
-        bestSeasons: poi.region.bestSeasons as any,
-        typicalTripDays: poi.region.typicalTripDays,
-      },
-      category: poi.category as any,
-      latitude: poi.latitude,
-      longitude: poi.longitude,
-      description: poi.description,
-      bestSeasons: poi.bestSeasons as any,
-      altitudeMeters: poi.altitudeMeters,
-      requiresPermit: poi.requiresPermit,
-      permitAuthority: poi.permitAuthority,
-      permitNotes: poi.permitNotes,
-      roadCondition: poi.roadCondition as any,
-      avgVisitHours: poi.avgVisitHours,
-      entryFeePkr: poi.entryFeePkr,
-      safetyNotes: poi.safetyNotes,
-      googlePlaceId: poi.googlePlaceId,
-      photos: poi.photos,
-      source: (poi.source as any) || "curated",
-      verifiedAt: poi.verifiedAt?.toISOString() ?? null,
-    })),
-  });
+  let modelResult;
+  try {
+    modelResult = await generateItineraryWithRetry({
+      userPrompt: parsed.data.prompt || parsed.data.destination || "Build a grounded itinerary",
+      todayIso: new Date().toISOString(),
+      tripDateRange: `${startDate.toISOString()}..${endDate.toISOString()}`,
+      candidatePois: candidates.map((poi) => ({
+        id: poi.id,
+        name: poi.name,
+        slug: poi.slug,
+        regionId: poi.regionId,
+        region: {
+          id: poi.region.id,
+          name: poi.region.name,
+          province: poi.region.province,
+          slug: poi.region.slug,
+          description: poi.region.description,
+          heroImageUrl: poi.region.heroImageUrl,
+          bestSeasons: poi.region.bestSeasons as any,
+          typicalTripDays: poi.region.typicalTripDays,
+        },
+        category: poi.category as any,
+        latitude: poi.latitude,
+        longitude: poi.longitude,
+        description: poi.description,
+        bestSeasons: poi.bestSeasons as any,
+        altitudeMeters: poi.altitudeMeters,
+        requiresPermit: poi.requiresPermit,
+        permitAuthority: poi.permitAuthority,
+        permitNotes: poi.permitNotes,
+        roadCondition: poi.roadCondition as any,
+        avgVisitHours: poi.avgVisitHours,
+        entryFeePkr: poi.entryFeePkr,
+        safetyNotes: poi.safetyNotes,
+        googlePlaceId: poi.googlePlaceId,
+        photos: poi.photos,
+        source: (poi.source as any) || "curated",
+        verifiedAt: poi.verifiedAt?.toISOString() ?? null,
+      })),
+    });
+  } catch (err) {
+    if (err instanceof ItineraryGenerationError) {
+      return jsonError(
+        "We couldn't generate a reliable itinerary automatically. Please build this trip's days manually, or try generating again.",
+        422,
+      );
+    }
+    throw err;
+  }
 
   const candidateSet = new Set(candidates.map((poi) => poi.id));
 

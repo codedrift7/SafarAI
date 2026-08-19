@@ -198,7 +198,9 @@ ALTER TABLE "SavedPlace" ADD CONSTRAINT "SavedPlace_userId_fkey" FOREIGN KEY ("u
 ALTER TABLE "SavedPlace" ADD CONSTRAINT "SavedPlace_poiId_fkey" FOREIGN KEY ("poiId") REFERENCES "POI"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "ChatMessage" ADD CONSTRAINT "ChatMessage_tripId_fkey" FOREIGN KEY ("tripId") REFERENCES "Trip"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
--- TODO(design.md §10): confirm with founder whether to move to a dedicated geography column.
+-- Geospatial index for POI coordinates.
 CREATE INDEX IF NOT EXISTS "poi_geo_idx"
 ON "POI"
-USING GIST (ST_SetSRID(ST_MakePoint("longitude", "latitude"), 4326)::geography);
+USING GIST (
+  CAST(ST_SetSRID(ST_MakePoint("longitude", "latitude"), 4326) AS geography)
+);

@@ -1,10 +1,11 @@
+// src/app/api/v1/trips/route.ts
 import { prisma } from "@/server/db";
 import { jsonError, jsonOk } from "@/server/http";
 import { parseJson } from "@/server/route-utils";
 import { createTripSchema } from "@/server/validators";
 import { toTrip } from "@/server/serialize";
 import { getTripByIdOrSlug, tripInclude } from "@/server/trip-service";
-import { getCurrentUserPayload } from "@/server/auth";
+import { requireAuth } from "@/server/auth";
 
 function slugify(value: string): string {
   return value
@@ -16,7 +17,16 @@ function slugify(value: string): string {
 }
 
 export async function GET() {
+  const auth = await requireAuth();
+  if (!auth.ok) return auth.response;
+
   const trips = await prisma.trip.findMany({
+    where: {
+      OR: [
+        { ownerId: auth.payload.sub },
+        { collaborators: { some: { userId: auth.payload.sub } } },
+      ],
+    },
     include: tripInclude,
     orderBy: { updatedAt: "desc" },
   });
@@ -24,11 +34,13 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireAuth();
+  if (!auth.ok) return auth.response;
+
   const parsed = await parseJson(request, createTripSchema);
   if (!parsed.ok) return parsed.response;
 
-  const auth = await getCurrentUserPayload();
-  const ownerId = auth?.sub ?? "user-sana-khan";
+  const ownerId = auth.payload.sub;
   const owner = await prisma.user.findUnique({ where: { id: ownerId } });
   if (!owner) return jsonError("Owner user not found", 401);
 

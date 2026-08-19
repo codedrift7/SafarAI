@@ -4,12 +4,14 @@ import { getClientIp, jsonError, jsonOk } from "@/server/http";
 import { parseJson } from "@/server/route-utils";
 import { loginSchema } from "@/server/validators";
 import { enforceRateLimit } from "@/server/rate-limit";
+import { env } from "@/server/env";
 
 async function verifyGoogleIdToken(idToken: string): Promise<{ email: string; name: string } | null> {
   const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
   if (!response.ok) return null;
-  const payload = await response.json() as { email?: string; name?: string };
+  const payload = await response.json() as { email?: string; name?: string; aud?: string };
   if (!payload.email) return null;
+  if (!payload.aud || payload.aud !== env.GOOGLE_CLIENT_ID) return null;
   return { email: payload.email, name: payload.name || payload.email.split("@")[0] || "Traveler" };
 }
 
@@ -40,6 +42,9 @@ export async function POST(request: Request) {
     const valid = await verifyPassword(user.passwordHash, parsed.data.password);
     if (!valid) return jsonError("Invalid email or password", 401);
   } else {
+    if (user && user.authProvider !== "google") {
+      return jsonError("An account with this email already exists. Log in with email and password instead.", 409);
+    }
     if (!user) {
       user = await prisma.user.create({
         data: { email, name, authProvider: "google", passwordHash: null },

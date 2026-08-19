@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import {
   mockUsers,
   pois,
@@ -20,7 +20,7 @@ async function main() {
   await prisma.tripCollaborator.deleteMany();
   await prisma.trip.deleteMany();
   await prisma.tripTemplate.deleteMany();
-  await prisma.poi.deleteMany();
+  await prisma.pOI.deleteMany();
   await prisma.region.deleteMany();
   await prisma.visaGuide.deleteMany();
   await prisma.user.deleteMany();
@@ -57,7 +57,7 @@ async function main() {
   }
 
   for (const poi of pois) {
-    await prisma.poi.create({
+    await prisma.pOI.create({
       data: {
         id: poi.id,
         name: poi.name,
@@ -95,7 +95,7 @@ async function main() {
         priceTier: template.priceTier ?? null,
         coverImageUrl: template.coverImageUrl ?? null,
         description: template.description,
-        itineraryJson: template.itineraryJson,
+        itineraryJson: template.itineraryJson as unknown as Prisma.InputJsonValue,
         usageCount: template.usageCount,
       },
     });
@@ -162,7 +162,9 @@ async function main() {
         tripId: message.tripId,
         role: message.role,
         content: message.content,
-        toolCalls: message.toolCalls ?? undefined,
+        toolCalls: (message.toolCalls ?? undefined) as unknown as
+          | Prisma.InputJsonValue
+          | undefined,
         createdAt: new Date(message.createdAt),
       },
     });

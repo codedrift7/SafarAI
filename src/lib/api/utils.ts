@@ -3,24 +3,74 @@ const defaultBaseUrl =
   process.env.CLIENT_URL ||
   "http://localhost:3000";
 
+export function clone<T>(value: T): T {
+  return structuredClone(value);
+}
+
 export function apiUrl(path: string): string {
   if (typeof window !== "undefined") return path;
   return `${defaultBaseUrl}${path}`;
 }
 
-export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(apiUrl(path), {
+async function getServerCookieHeader(): Promise<string | undefined> {
+  if (typeof window !== "undefined") return undefined;
+
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+
+  const cookieHeader = cookieStore
+    .getAll()
+    .map(({ name, value }) => `${name}=${value}`)
+    .join("; ");
+
+  return cookieHeader || undefined;
+}
+
+
+async function requestJson<T>(
+  path: string,
+  init?: RequestInit,
+): Promise<Response> {
+  const serverCookieHeader = await getServerCookieHeader();
+
+  const headers = new Headers(init?.headers);
+  headers.set("Content-Type", "application/json");
+
+  if (serverCookieHeader) {
+    headers.set("Cookie", serverCookieHeader);
+  }
+
+  return fetch(apiUrl(path), {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
+    headers,
     cache: "no-store",
     credentials: "include",
   });
+}
+export async function fetchJson<T>(
+  path: string,
+  init?: RequestInit,
+): Promise<T> {
+  let response = await requestJson<T>(path, init);
+
+  // Only browser requests should perform automatic refresh.
+  if (response.status === 401 && typeof window !== "undefined") {
+    const refreshResponse = await fetch("/api/v1/auth/refresh", {
+      method: "POST",
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    if (refreshResponse.ok) {
+      response = await requestJson<T>(path, init);
+    }
+  }
 
   if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as { error?: string } | null;
+    const body = (await response.json().catch(() => null)) as {
+      error?: string;
+    } | null;
+
     throw new Error(body?.error || `Request failed: ${response.status}`);
   }
 

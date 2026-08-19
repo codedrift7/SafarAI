@@ -14,8 +14,11 @@ import type {
 import { fetchJson } from "./utils";
 import { getTripAdvisories as deriveTripAdvisories } from "./advisories";
 
-export async function listTrips(_filters: TripFilters = {}): Promise<Trip[]> {
-  return fetchJson<Trip[]>("/api/v1/trips");
+export async function listTrips(
+  _filters: TripFilters = {},
+  init?: RequestInit,
+): Promise<Trip[]> {
+  return fetchJson<Trip[]>("/api/v1/trips", init);
 }
 
 export async function getTrip(idOrSlug: string): Promise<Trip | null> {
@@ -109,16 +112,23 @@ export async function voteActivity(id: string): Promise<{ activityId: string; vo
 }
 
 export async function exportTrip(id: string): Promise<TripExport> {
-  const response = await fetch(`/api/v1/trips/${id}/export/pdf`, { cache: "no-store" });
-  if (response.status === 202) {
+  const maxTotalWaitMs = 60000;
+  const started = Date.now();
+
+  let response = await fetch(`/api/v1/trips/${id}/export/pdf`, { cache: "no-store" });
+
+  while (response.status === 202) {
+    if (Date.now() - started >= maxTotalWaitMs) {
+      throw new Error("PDF export is taking longer than expected. Please try again in a moment.");
+    }
     const queued = (await response.json()) as { jobId: string };
-    return {
-      filename: `trip-${id}.pdf`,
-      mimeType: "application/pdf",
-      content: `PDF export queued: ${queued.jobId}`,
-    };
+    response = await fetch(`/api/v1/trips/${id}/export/pdf?jobId=${encodeURIComponent(queued.jobId)}`, {
+      cache: "no-store",
+    });
   }
+
   if (!response.ok) throw new Error("Failed to export trip PDF");
+
   const blob = await response.blob();
   const text = await blob.text();
   return {
