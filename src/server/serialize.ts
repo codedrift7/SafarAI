@@ -141,6 +141,21 @@ export function toTrip(trip: TripWithRelations): Trip {
   };
 }
 
+/**
+ * Serializer for the unauthenticated share link. Anyone holding the token can read this,
+ * so it drops everything that identifies the people on the trip (owner/collaborator emails
+ * and ids) and the share token itself.
+ */
+export function toPublicTrip(trip: TripWithRelations): Trip {
+  const full = toTrip(trip);
+  return {
+    ...full,
+    owner: full.owner ? { name: full.owner.name, avatarUrl: full.owner.avatarUrl } : undefined,
+    collaborators: [],
+    shareToken: null,
+  };
+}
+
 export function toRegionDto(region: any): Region {
   return toRegion(region);
 }

@@ -41,7 +41,7 @@ if (!globalStore[workerKey]) {
         const page = await browser.newPage();
         await page.goto(job.data.targetUrl, { waitUntil: "networkidle0", timeout: 60000 });
         const pdf = await page.pdf({ format: "A4", printBackground: true });
-        await redis.set(`pdf:${job.id}`, Buffer.from(pdf).toString("base64"), "EX", 60 * 10);
+        await redis.set(pdfResultKey(job.data.tripId, String(job.id)), Buffer.from(pdf).toString("base64"), "EX", 60 * 10);
       } finally {
         await browser.close();
       }
@@ -55,8 +55,14 @@ export async function enqueuePdfExport(data: PdfJobData, opts?: JobsOptions): Pr
   return String(job.id);
 }
 
-export async function getPdfResult(jobId: string): Promise<Buffer | null> {
-  const encoded = await redis.get(`pdf:${jobId}`);
+// Results are namespaced by trip so a job id alone can never be redeemed: the caller has to
+// already be authorized on the trip the job was enqueued for.
+function pdfResultKey(tripId: string, jobId: string): string {
+  return `pdf:${tripId}:${jobId}`;
+}
+
+export async function getPdfResult(tripId: string, jobId: string): Promise<Buffer | null> {
+  const encoded = await redis.get(pdfResultKey(tripId, jobId));
   if (!encoded) return null;
   return Buffer.from(encoded, "base64");
 }

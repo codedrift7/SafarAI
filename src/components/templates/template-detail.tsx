@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CalendarDays, Check, CircleDollarSign, MapPinned, Sparkles } from "lucide-react";
 import type { POI, TripTemplate } from "@/lib/domain/types";
-import { useTemplate } from "@/lib/api";
+import { applyTemplate } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PoiCard } from "@/components/pois/poi-card";
@@ -15,7 +15,7 @@ export function TemplateDetail({ template, places }: { template: TripTemplate; p
   const makeTrip = async () => {
     setLoading(true);
     try {
-      const trip = await useTemplate(template.id);
+      const trip = await applyTemplate(template.id);
       router.push(`/trips/${trip.id}`);
     } finally { setLoading(false); }
   };

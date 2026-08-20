@@ -14,12 +14,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   const existingJobId = new URL(request.url).searchParams.get("jobId");
 
-  const jobId = existingJobId ?? (await enqueuePdfExport({ tripId: id, targetUrl: `${env.CLIENT_URL}/trips/${id}` }));
+  const tripId = access.trip.id;
+  const jobId =
+    existingJobId ?? (await enqueuePdfExport({ tripId, targetUrl: `${env.CLIENT_URL}/trips/${tripId}` }));
 
   const started = Date.now();
   let pdf: Buffer | null = null;
   while (!pdf && Date.now() - started < 20000) {
-    pdf = await getPdfResult(jobId);
+    pdf = await getPdfResult(tripId, jobId);
     if (!pdf) {
       await new Promise((resolve) => setTimeout(resolve, 500));
     }

@@ -173,7 +173,8 @@ export interface TripCollaborator {
 export interface Trip {
   id: string;
   ownerId: string;
-  owner?: Pick<User, "id" | "name" | "email" | "avatarUrl">;
+  /** Identifying fields are omitted on publicly shared trips. */
+  owner?: Pick<User, "name" | "avatarUrl"> & Partial<Pick<User, "id" | "email">>;
   title: string;
   slug: string;
   startDate: ISODateString;

@@ -7,7 +7,7 @@
     "build": "next build && npm run build:server",
     "start": "cross-env NODE_ENV=production node dist-server/index.js",
     "build:server": "tsc -p src/server/tsconfig.server.json && tsc-alias -p src/server/tsconfig.server.json",
-    "lint": "next lint",
+    "lint": "eslint .",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:seed": "prisma db seed"

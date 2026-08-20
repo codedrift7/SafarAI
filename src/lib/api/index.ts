@@ -24,7 +24,7 @@ export {
   listTemplates,
   getTemplate,
   getTemplateById,
-  useTemplate,
+  applyTemplate,
   getVisaInfo,
   createPackingList,
 } from "./catalog";

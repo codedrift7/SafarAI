@@ -3,6 +3,7 @@ import type {
   PackingListInput,
   POI,
   POIFilters,
+  Region,
   TemplateFilters,
   Trip,
   TripTemplate,
@@ -16,12 +17,16 @@ export interface UseTemplateInput {
   ownerId?: string;
 }
 
-export async function listRegions(): Promise<any[]> {
-  return fetchJson<any[]>("/api/v1/regions");
+export async function listRegions(): Promise<Region[]> {
+  return fetchJson<Region[]>("/api/v1/regions");
 }
 
-export async function getRegion(idOrSlug: string) {
-  return fetchJson(`/api/v1/regions/${idOrSlug}`);
+export async function getRegion(idOrSlug: string): Promise<Region | null> {
+  try {
+    return await fetchJson<Region>(`/api/v1/regions/${idOrSlug}`);
+  } catch {
+    return null;
+  }
 }
 
 export const getRegionBySlug = getRegion;
@@ -74,7 +79,7 @@ export async function getTemplate(id: string): Promise<TripTemplate | null> {
 
 export const getTemplateById = getTemplate;
 
-export async function useTemplate(templateId: string, input: UseTemplateInput = {}): Promise<Trip> {
+export async function applyTemplate(templateId: string, input: UseTemplateInput = {}): Promise<Trip> {
   return fetchJson<Trip>(`/api/v1/templates/${templateId}/use`, {
     method: "POST",
     body: JSON.stringify(input),

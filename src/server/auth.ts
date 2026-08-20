@@ -46,12 +46,16 @@ export async function signRefreshToken(payload: Omit<AuthTokenPayload, "type">):
 
 export async function verifyAccessToken(token: string): Promise<AuthTokenPayload> {
   const result = await jwtVerify(token, accessSecret);
-  return result.payload as unknown as AuthTokenPayload;
+  const payload = result.payload as unknown as AuthTokenPayload;
+  if (payload.type !== "access") throw new Error("Expected an access token");
+  return payload;
 }
 
 export async function verifyRefreshToken(token: string): Promise<AuthTokenPayload> {
   const result = await jwtVerify(token, refreshSecret);
-  return result.payload as unknown as AuthTokenPayload;
+  const payload = result.payload as unknown as AuthTokenPayload;
+  if (payload.type !== "refresh") throw new Error("Expected a refresh token");
+  return payload;
 }
 
 export async function setAuthCookies(response: NextResponse, accessToken: string, refreshToken: string): Promise<void> {
@@ -85,25 +89,13 @@ export async function getCurrentUserPayload(
     req?.cookies.get("safar_access")?.value ??
     cookieStore.get("safar_access")?.value;
 
-  const refresh =
-    req?.cookies.get("safar_refresh")?.value ??
-    cookieStore.get("safar_refresh")?.value;
+  if (!access) return null;
 
-  // 1. Try the normal access token first.
-  if (access) {
-    try {
-      return await verifyAccessToken(access);
-    } catch {
-      // Access token expired/invalid.
-      // Continue to refresh-token fallback.
-    }
-  }
-
-  // 2. Fall back to the refresh token.
-  if (!refresh) return null;
-
+  // Only the short-lived access token authenticates a request. An expired access token
+  // means the client has to spend its refresh token on POST /api/v1/auth/refresh, which
+  // is the single place allowed to trade it for a new session.
   try {
-    return await verifyRefreshToken(refresh);
+    return await verifyAccessToken(access);
   } catch {
     return null;
   }

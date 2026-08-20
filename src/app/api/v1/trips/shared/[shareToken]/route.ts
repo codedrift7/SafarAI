@@ -1,6 +1,6 @@
 import { prisma } from "@/server/db";
 import { jsonError, jsonOk } from "@/server/http";
-import { toTrip } from "@/server/serialize";
+import { toPublicTrip } from "@/server/serialize";
 import { tripInclude } from "@/server/trip-service";
 
 export async function GET(_: Request, { params }: { params: Promise<{ shareToken: string }> }) {
@@ -10,5 +10,5 @@ export async function GET(_: Request, { params }: { params: Promise<{ shareToken
     include: tripInclude,
   });
   if (!trip) return jsonError("Trip not found", 404);
-  return jsonOk(toTrip(trip));
+  return jsonOk(toPublicTrip(trip));
 }
