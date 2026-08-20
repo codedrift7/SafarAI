@@ -108,7 +108,7 @@ export function hydrateActivity(activity: Activity): Activity {
 }
 
 export function hydrateTrip(trip: Trip): Trip {
-  const owner = getRawUser(trip.ownerId);
+  const owner = trip.ownerId ? getRawUser(trip.ownerId) : undefined;
   const days = [...trip.days]
     .sort((left, right) => left.dayNumber - right.dayNumber)
     .map((day) => {

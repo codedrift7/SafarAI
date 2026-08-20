@@ -172,7 +172,8 @@ export interface TripCollaborator {
 
 export interface Trip {
   id: string;
-  ownerId: string;
+  /** Omitted, along with the identifying fields of `owner`, on publicly shared trips. */
+  ownerId?: string;
   /** Identifying fields are omitted on publicly shared trips. */
   owner?: Pick<User, "name" | "avatarUrl"> & Partial<Pick<User, "id" | "email">>;
   title: string;

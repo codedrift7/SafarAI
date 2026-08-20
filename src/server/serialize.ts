@@ -150,6 +150,7 @@ export function toPublicTrip(trip: TripWithRelations): Trip {
   const full = toTrip(trip);
   return {
     ...full,
+    ownerId: undefined,
     owner: full.owner ? { name: full.owner.name, avatarUrl: full.owner.avatarUrl } : undefined,
     collaborators: [],
     shareToken: null,

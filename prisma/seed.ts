@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import {
+  mockUser,
   mockUsers,
   pois,
   regions,
@@ -104,7 +105,7 @@ async function main() {
   await prisma.trip.create({
     data: {
       id: sampleHunzaTrip.id,
-      ownerId: sampleHunzaTrip.ownerId,
+      ownerId: sampleHunzaTrip.ownerId ?? mockUser.id,
       title: sampleHunzaTrip.title,
       slug: sampleHunzaTrip.slug,
       startDate: new Date(sampleHunzaTrip.startDate),
