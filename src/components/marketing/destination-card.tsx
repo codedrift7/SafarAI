@@ -4,8 +4,9 @@ import type { Region } from "@/lib/domain/types";
 import { Badge } from "@/components/ui/badge";
 
 export function DestinationCard({ region, index = 0 }: { region: Region; index?: number }) {
+  const isTopPositioned = region.slug === "lahore";
   return <Link href={`/destinations/${region.slug}`} className="group relative isolate min-h-[330px] overflow-hidden rounded-[1.5rem] bg-karakoram-ink p-5 text-sandstone-mist shadow-route-card focus-visible:outline-truck-art-marigold sm:min-h-[390px]">
-    {region.heroImageUrl && <div className="absolute inset-0 -z-20 bg-cover bg-center transition duration-700 group-hover:scale-105" style={{ backgroundImage: `url(${region.heroImageUrl})` }} />}
+    {region.heroImageUrl && <div className="absolute inset-0 -z-20 bg-cover transition duration-700 group-hover:scale-105" style={{ backgroundImage: `url(${region.heroImageUrl})`, backgroundPosition: isTopPositioned ? "center top" : "center" }} />}
     <div className="absolute inset-0 -z-10 bg-gradient-to-t from-karakoram-ink via-karakoram-ink/35 to-karakoram-ink/5" />
     <div className="flex h-full flex-col justify-between">
       <div className="flex items-start justify-between gap-3"><Badge variant="marigold">{region.province}</Badge><span className="grid size-9 place-items-center rounded-full border border-white/25 bg-karakoram-ink/20 opacity-0 backdrop-blur transition group-hover:opacity-100"><ArrowUpRight size={18} /></span></div>

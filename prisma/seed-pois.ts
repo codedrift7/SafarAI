@@ -1,4 +1,8 @@
+import { loadEnvConfig } from "@next/env";
 import { PrismaClient } from "@prisma/client";
+
+loadEnvConfig(process.cwd());
+
 import { pois } from "../src/lib/mock-data";
 
 const prisma = new PrismaClient();

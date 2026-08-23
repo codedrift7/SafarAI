@@ -7,6 +7,9 @@ import { redis } from "./cache";
 export interface PdfJobData {
   tripId: string;
   targetUrl: string;
+  // A1: render token forwarded as an HTTP header so Puppeteer can authenticate
+  // without embedding credentials in the URL (which would appear in logs).
+  renderToken: string;
 }
 
 // Two separate connections, per BullMQ's own production guidance: a Worker should retry
@@ -39,6 +42,11 @@ if (!globalStore[workerKey]) {
       const browser = await puppeteer.launch({ headless: true });
       try {
         const page = await browser.newPage();
+        // A1: Inject the render token as an Authorization header so the trip page and
+        // chat/history route can authenticate via requireAuthOrRenderToken().
+        await page.setExtraHTTPHeaders({
+          Authorization: `Bearer ${job.data.renderToken}`,
+        });
         await page.goto(job.data.targetUrl, { waitUntil: "networkidle0", timeout: 60000 });
         const pdf = await page.pdf({ format: "A4", printBackground: true });
         await redis.set(pdfResultKey(job.data.tripId, String(job.id)), Buffer.from(pdf).toString("base64"), "EX", 60 * 10);
@@ -50,8 +58,14 @@ if (!globalStore[workerKey]) {
   );
 }
 
+// A3: Default retention policy so completed/failed jobs don't accumulate indefinitely.
+const DEFAULT_JOB_OPTS: JobsOptions = {
+  removeOnComplete: { age: 3600, count: 1000 },
+  removeOnFail: { age: 3600 },
+};
+
 export async function enqueuePdfExport(data: PdfJobData, opts?: JobsOptions): Promise<string> {
-  const job = await pdfQueue.add("render", data, opts);
+  const job = await pdfQueue.add("render", data, { ...DEFAULT_JOB_OPTS, ...opts });
   return String(job.id);
 }
 

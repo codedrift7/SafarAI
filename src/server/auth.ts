@@ -2,7 +2,7 @@
 import argon2 from "argon2";
 import { SignJWT, jwtVerify } from "jose";
 import type { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { env } from "./env";
 import { jsonError } from "@/server/http";
 
@@ -115,4 +115,103 @@ export async function requireAuth(req?: NextRequest): Promise<AuthResult> {
     return { ok: false, response: jsonError("Unauthorized", 401) };
   }
   return { ok: true, payload };
+}
+
+// ---------------------------------------------------------------------------
+// Render token — A1 (PDF export auth)
+//
+// A short-lived, narrowly-scoped credential that lets the Puppeteer worker fetch
+// a trip page as if it were the owner who triggered the export. It is ONLY accepted
+// by requireAuthOrRenderToken(), which also checks that the token's tripId matches
+// the specific trip being requested.  It must NOT be used as a generic bearer token
+// for any other route.
+// ---------------------------------------------------------------------------
+
+interface RenderTokenPayload {
+  sub: string;
+  tripId: string;
+  type: "render";
+}
+
+/**
+ * Mint a render token for a specific trip. Expires in 2 minutes — enough time for
+ * Puppeteer to render the page but too short to be useful if captured.
+ */
+export async function signRenderToken(tripId: string, userId: string): Promise<string> {
+  return new SignJWT({ sub: userId, tripId, type: "render" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("2m")
+    .sign(accessSecret);
+}
+
+/**
+ * Verify a render token. Throws if the signature is invalid, the token is expired,
+ * or the `type` claim is not "render".
+ */
+export async function verifyRenderToken(token: string): Promise<RenderTokenPayload> {
+  const result = await jwtVerify(token, accessSecret);
+  const payload = result.payload as unknown as RenderTokenPayload;
+  if (payload.type !== "render") throw new Error("Expected a render token");
+  return payload;
+}
+
+/**
+ * Auth gate for the two routes that Puppeteer needs to access (GET /trips/[id] and
+ * GET /trips/[id]/chat/history). Tries cookie-based auth first; if that fails, reads
+ * the Authorization header and attempts a render-token verification, checking that the
+ * token's tripId matches the specific tripId param of this route.
+ *
+ * Do NOT apply this to any other route — the render token is scoped to these two only.
+ */
+export async function requireAuthOrRenderToken(
+  tripId: string,
+  req?: NextRequest,
+): Promise<AuthResult> {
+  // 1. Try normal cookie auth first (regular browser session).
+  const cookiePayload = await getCurrentUserPayload(req);
+  if (cookiePayload) {
+    return { ok: true, payload: cookiePayload };
+  }
+
+  // 2. Fall back to Authorization header (render token from Puppeteer).
+  let authHeader: string | null | undefined;
+  if (req) {
+    authHeader = req.headers.get("authorization");
+  } else {
+    try {
+      const headerStore = await headers();
+      authHeader = headerStore.get("authorization");
+    } catch {
+      authHeader = null;
+    }
+  }
+
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    try {
+      const renderPayload = await verifyRenderToken(token);
+
+      // Scope check: the render token must be for this exact trip.
+      if (renderPayload.tripId !== tripId) {
+        return { ok: false, response: jsonError("Unauthorized", 401) };
+      }
+
+      // Synthesise a minimal AuthTokenPayload so downstream code that reads
+      // auth.payload.sub works without change.
+      return {
+        ok: true,
+        payload: {
+          sub: renderPayload.sub,
+          email: "",
+          provider: "render",
+          type: "access",
+        },
+      };
+    } catch {
+      // Invalid/expired render token — fall through to 401.
+    }
+  }
+
+  return { ok: false, response: jsonError("Unauthorized", 401) };
 }

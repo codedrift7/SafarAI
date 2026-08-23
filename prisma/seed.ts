@@ -1,4 +1,8 @@
+import { loadEnvConfig } from "@next/env";
 import { Prisma, PrismaClient } from "@prisma/client";
+
+loadEnvConfig(process.cwd());
+
 import {
   mockUser,
   mockUsers,

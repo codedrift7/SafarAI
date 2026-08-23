@@ -17,7 +17,8 @@ export const itineraryActivitySchema = z.object({
   ]),
   startTime: z.string().regex(timeRegex),
   endTime: z.string().regex(timeRegex),
-  note: z.string().nullable().optional().default(""),
+  // B3: note is required and must be non-empty — no more silent empty strings
+  note: z.string().min(1),
 });
 
 export const itineraryDaySchema = z.object({
@@ -37,7 +38,11 @@ export const toolDefinitions = [
     type: "function",
     function: {
       name: "generate_itinerary",
-      description: "Generate a day by day itinerary using only candidate POIs provided in context",
+      description:
+        "Generate a day-by-day itinerary using only the candidate POIs provided in context. " +
+        "For every activity, `note` is required and must be 1–2 sentences explaining what the place is " +
+        "and why it is worth stopping there. Include a practical tip (entry fee, permit requirement, " +
+        "visit duration, safety note, or road condition) when the data is available. Do not leave `note` blank.",
       parameters: {
         type: "object",
         properties: {
@@ -53,8 +58,8 @@ export const toolDefinitions = [
                   items: {
                     type: "object",
                     properties: {
-                      poiId: { type: ["string", "null"] },
-                      customTitle: { type: ["string", "null"] },
+                      poiId: { type: "string", description: "ID of a candidate POI, or omit if suggesting an unverified stop" },
+                      customTitle: { type: "string", description: "Title for unverified stops (when poiId is omitted)" },
                       category: {
                         type: "string",
                         enum: [
@@ -70,9 +75,15 @@ export const toolDefinitions = [
                       },
                       startTime: { type: "string", pattern: "^([01]\\d|2[0-3]):[0-5]\\d$" },
                       endTime: { type: "string", pattern: "^([01]\\d|2[0-3]):[0-5]\\d$" },
-                      note: { type: ["string", "null"] },
+                      // B3: note is in required[] and described as mandatory prose
+                      note: {
+                        type: "string",
+                        description:
+                          "1–2 sentences: what the place is and why it is worth the stop. " +
+                          "Add a practical tip (fee, permit, duration, safety note) when available. Required.",
+                      },
                     },
-                    required: ["category", "startTime", "endTime"],
+                    required: ["category", "startTime", "endTime", "note"],
                   },
                 },
               },
@@ -96,12 +107,12 @@ export const chatToolDefinitions = [
         type: "object",
         properties: {
           tripDayId: { type: "string" },
-          poiId: { type: ["string", "null"] },
-          customTitle: { type: ["string", "null"] },
+          poiId: { type: "string" },
+          customTitle: { type: "string" },
           category: { type: "string" },
           startTime: { type: "string" },
           endTime: { type: "string" },
-          afterActivityId: { type: ["string", "null"] },
+          afterActivityId: { type: "string" },
         },
         required: ["tripDayId", "category", "startTime", "endTime"],
       },

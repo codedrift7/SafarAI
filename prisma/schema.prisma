@@ -112,6 +112,8 @@ model Trip {
   coverImageUrl String?
   isPublic      Boolean     @default(false)
   shareToken    String?     @unique
+  partySize     Int?
+  vibe          String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
@@ -164,8 +166,14 @@ model Activity {
   estimatedCost Float?
   costCurrency  String           @default("PKR")
   addedByUserId String?
+  source        ActivitySource   @default(model)
 
   votes ActivityVote[]
+}
+
+enum ActivitySource {
+  model
+  auto_fill
 }
 
 model ActivityVote {

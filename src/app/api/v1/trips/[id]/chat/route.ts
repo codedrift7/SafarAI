@@ -144,31 +144,31 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const poiId = requestedPoiId && candidateSet.has(requestedPoiId) ? requestedPoiId : null;
 
       const activityCategoryMap: Record<string, string> = {
-      MOUNTAIN: "ADVENTURE",
-      LAKE: "SIGHTSEEING",
-      FORT: "SIGHTSEEING",
-      MOSQUE: "RELIGIOUS",
-      SHRINE: "RELIGIOUS",
-      MUSEUM: "SIGHTSEEING",
-      BAZAAR: "SHOPPING",
-      WATERFALL: "ADVENTURE",
-      NATIONAL_PARK: "ADVENTURE",
-      HILL_STATION: "SIGHTSEEING",
-      VALLEY: "SIGHTSEEING",
-      GLACIER: "ADVENTURE",
-      ARCHAEOLOGICAL_SITE: "SIGHTSEEING",
-      CITY_LANDMARK: "SIGHTSEEING",
-      RESTAURANT: "FOOD",
-      VIEWPOINT: "SIGHTSEEING",
-    };
+        MOUNTAIN: "ADVENTURE",
+        LAKE: "SIGHTSEEING",
+        FORT: "SIGHTSEEING",
+        MOSQUE: "RELIGIOUS",
+        SHRINE: "RELIGIOUS",
+        MUSEUM: "SIGHTSEEING",
+        BAZAAR: "SHOPPING",
+        WATERFALL: "ADVENTURE",
+        NATIONAL_PARK: "ADVENTURE",
+        HILL_STATION: "SIGHTSEEING",
+        VALLEY: "SIGHTSEEING",
+        GLACIER: "ADVENTURE",
+        ARCHAEOLOGICAL_SITE: "SIGHTSEEING",
+        CITY_LANDMARK: "SIGHTSEEING",
+        RESTAURANT: "FOOD",
+        VIEWPOINT: "SIGHTSEEING",
+      };
 
-    const requestedPoiCategory =
-      typeof tool.args.category === "string"
-        ? tool.args.category.trim().toUpperCase()
-        : "";
+      const requestedPoiCategory =
+        typeof tool.args.category === "string"
+          ? tool.args.category.trim().toUpperCase()
+          : "";
 
-    const activityCategory =
-      activityCategoryMap[requestedPoiCategory] ?? "SIGHTSEEING";
+      const activityCategory =
+        activityCategoryMap[requestedPoiCategory] ?? "SIGHTSEEING";
 
       updatedActivity = await prisma.activity.create({
         data: {

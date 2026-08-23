@@ -1,14 +1,16 @@
 import { prisma } from "@/server/db";
 import { jsonOk } from "@/server/http";
-import { requireAuth } from "@/server/auth";
+import { requireAuthOrRenderToken } from "@/server/auth";
 import { requireTripAccess } from "@/server/trip-service";
 import { toChatDto } from "@/server/serialize";
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requireAuth();
+  const { id } = await params;
+
+  // A1f: Accept either a normal cookie session or a render token scoped to this trip.
+  const auth = await requireAuthOrRenderToken(id);
   if (!auth.ok) return auth.response;
 
-  const { id } = await params;
   const access = await requireTripAccess(id, auth.payload.sub, "VIEWER");
   if (!access.ok) return access.response;
 

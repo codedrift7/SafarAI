@@ -75,7 +75,8 @@ function toActivity(activity: any): Activity {
     estimatedCost: activity.estimatedCost,
     costCurrency: activity.costCurrency,
     addedByUserId: activity.addedByUserId,
-  };
+    source: activity.source ?? "model",
+  } as Activity;
 }
 
 function toDay(day: any): TripDay {
@@ -134,6 +135,9 @@ export function toTrip(trip: TripWithRelations): Trip {
     coverImageUrl: trip.coverImageUrl,
     isPublic: trip.isPublic,
     shareToken: trip.shareToken,
+    // B5e: partySize and vibe now persisted in Prisma and exposed in the DTO
+    partySize: (trip as any).partySize ?? undefined,
+    vibe: (trip as any).vibe ?? undefined,
     createdAt: trip.createdAt.toISOString(),
     updatedAt: trip.updatedAt.toISOString(),
     days: [...trip.days].sort((a, b) => a.dayNumber - b.dayNumber).map(toDay),

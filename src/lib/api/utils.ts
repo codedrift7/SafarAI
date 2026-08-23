@@ -33,11 +33,27 @@ async function requestJson<T>(
 ): Promise<Response> {
   const serverCookieHeader = await getServerCookieHeader();
 
+  // A1d: Also forward an incoming Authorization header (server-side only) so that
+  // Puppeteer's render token reaches internal API routes via server-side fetch.
+  let serverAuthHeader: string | undefined;
+  if (typeof window === "undefined") {
+    try {
+      const { headers: nextHeaders } = await import("next/headers");
+      const headerStore = await nextHeaders();
+      serverAuthHeader = headerStore.get("authorization") ?? undefined;
+    } catch {
+      // Outside a request context — ignore.
+    }
+  }
+
   const headers = new Headers(init?.headers);
   headers.set("Content-Type", "application/json");
 
   if (serverCookieHeader) {
     headers.set("Cookie", serverCookieHeader);
+  }
+  if (serverAuthHeader && !headers.has("Authorization")) {
+    headers.set("Authorization", serverAuthHeader);
   }
 
   return fetch(apiUrl(path), {

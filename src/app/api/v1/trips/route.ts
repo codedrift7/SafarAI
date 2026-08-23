@@ -63,6 +63,9 @@ export async function POST(request: Request) {
       budgetTier: parsed.data.budgetTier ?? null,
       pace: parsed.data.pace ?? "balanced",
       coverImageUrl: parsed.data.coverImageUrl ?? null,
+      // B5c: persist partySize and vibe on creation
+      partySize: parsed.data.partySize ?? null,
+      vibe: parsed.data.vibe ?? null,
       status: "DRAFT",
       collaborators: {
         create: {

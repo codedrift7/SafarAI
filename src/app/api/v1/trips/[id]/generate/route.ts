@@ -85,6 +85,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         source: (poi.source as any) || "curated",
         verifiedAt: poi.verifiedAt?.toISOString() ?? null,
       })),
+      // B2: Forward trip preferences — fall back to stored trip values when not overridden by
+      // the generate request body. This makes solo/packed and family/relaxed trips differ.
+      travelerType: parsed.data.travelerType ?? trip.travelerType,
+      budgetTier: parsed.data.budgetTier !== undefined ? parsed.data.budgetTier : trip.budgetTier,
+      pace: parsed.data.pace ?? trip.pace,
+      // B5: vibe and partySize from the persisted Trip record
+      vibe: (trip as any).vibe ?? null,
+      partySize: (trip as any).partySize ?? null,
     });
   } catch (err) {
     if (err instanceof ItineraryGenerationError) {
@@ -96,13 +104,57 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     throw err;
   }
 
+  // Layer 2: Post-generation gap detection and auto-fill.
+  // Wrapped in try/catch — a failure here degrades to the model's ungapped output,
+  // never takes down the request.
+  let finalDays = modelResult.days;
+  try {
+    const { fillGaps } = await import("@/lib/ai/gap-filler");
+    const { days, gapFillStats } = await fillGaps(
+      modelResult.days,
+      candidates.map((poi) => ({
+        id: poi.id,
+        name: poi.name,
+        slug: poi.slug,
+        regionId: poi.regionId,
+        category: poi.category as any,
+        latitude: poi.latitude,
+        longitude: poi.longitude,
+        description: poi.description,
+        bestSeasons: poi.bestSeasons as any,
+        altitudeMeters: poi.altitudeMeters,
+        requiresPermit: poi.requiresPermit,
+        avgVisitHours: poi.avgVisitHours,
+        entryFeePkr: poi.entryFeePkr,
+        safetyNotes: poi.safetyNotes,
+        photos: poi.photos,
+        source: (poi.source as any) || "curated",
+      })) as any,
+      { startDate, endDate },
+      trip.pace ?? "balanced",
+    );
+    finalDays = days;
+    if (gapFillStats.unfilled.length > 0) {
+      console.warn("[gap-filler] unfilled gaps", { tripId: trip.id, gapFillStats });
+    }
+    if (gapFillStats.filled > 0 || gapFillStats.restFilled > 0) {
+      console.log("[gap-filler] filled", {
+        tripId: trip.id,
+        filled: gapFillStats.filled,
+        restFilled: gapFillStats.restFilled,
+      });
+    }
+  } catch (err) {
+    console.error("[gap-filler] failed, falling back to ungapped days", err);
+  }
+
   const candidateSet = new Set(candidates.map((poi) => poi.id));
 
   await prisma.$transaction(async (tx) => {
     await tx.activity.deleteMany({ where: { tripDay: { tripId: trip.id } } });
     await tx.tripDay.deleteMany({ where: { tripId: trip.id } });
 
-    for (const day of modelResult.days) {
+    for (const day of finalDays) {
       const tripDay = await tx.tripDay.create({
         data: {
           tripId: trip.id,
@@ -114,17 +166,38 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       });
 
       for (const [index, activity] of day.activities.entries()) {
-        const validPoiId = activity.poiId && candidateSet.has(activity.poiId) ? activity.poiId : null;
+        // REST fillers have no poiId — skip candidate-set check for them.
+        // All other activities must be in the candidate set or get nulled out.
+        const isRest = activity.category === "REST";
+        const validPoiId = isRest
+          ? null
+          : activity.poiId && candidateSet.has(activity.poiId)
+            ? activity.poiId
+            : null;
+
+        // Determine source: if the activity has a poiId that isn't in the model's
+        // original output, it was inserted by the gap filler.
+        const isAutoFill = !modelResult.days.some((d) =>
+          d.activities.some((a) => a.poiId === activity.poiId && a.startTime === activity.startTime),
+        );
+
         await tx.activity.create({
           data: {
             tripDayId: tripDay.id,
             poiId: validPoiId,
-            customTitle: validPoiId ? null : activity.customTitle || "AI suggestion, unverified",
+            customTitle: isRest
+              ? (activity.customTitle || "Rest break")
+              : validPoiId
+                ? null
+                : activity.customTitle || "AI suggestion, unverified",
             category: activity.category as any,
             startTime: activity.startTime,
             endTime: activity.endTime,
             orderIndex: index,
-            notes: validPoiId ? activity.note : `${activity.note || ""} Unverified AI suggestion.`.trim(),
+            notes: validPoiId || isRest
+              ? activity.note
+              : `${activity.note || ""} Unverified AI suggestion.`.trim(),
+            source: isAutoFill ? "auto_fill" : "model",
           },
         });
       }

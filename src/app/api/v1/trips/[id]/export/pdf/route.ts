@@ -1,7 +1,7 @@
 import { enqueuePdfExport, getPdfResult } from "@/server/queue";
 import { env } from "@/server/env";
 import { jsonOk } from "@/server/http";
-import { requireAuth } from "@/server/auth";
+import { requireAuth, signRenderToken } from "@/server/auth";
 import { requireTripAccess } from "@/server/trip-service";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -12,29 +12,32 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const access = await requireTripAccess(id, auth.payload.sub, "VIEWER");
   if (!access.ok) return access.response;
 
+  const tripId = access.trip.id;
   const existingJobId = new URL(request.url).searchParams.get("jobId");
 
-  const tripId = access.trip.id;
-  const jobId =
-    existingJobId ?? (await enqueuePdfExport({ tripId, targetUrl: `${env.CLIENT_URL}/trips/${tripId}` }));
-
-  const started = Date.now();
-  let pdf: Buffer | null = null;
-  while (!pdf && Date.now() - started < 20000) {
-    pdf = await getPdfResult(tripId, jobId);
-    if (!pdf) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+  // A2: If this is a poll with an existing jobId, check cache once and return.
+  if (existingJobId) {
+    const pdf = await getPdfResult(tripId, existingJobId);
+    if (pdf) {
+      return new Response(new Uint8Array(pdf), {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="trip-${id}.pdf"`,
+        },
+      });
     }
+    return jsonOk({ status: "queued", jobId: existingJobId }, { status: 202 });
   }
 
-  if (!pdf) {
-    return jsonOk({ status: "queued", jobId }, { status: 202 });
-  }
+  // A1c: Mint a render token so Puppeteer can fetch the trip page as this user.
+  const renderToken = await signRenderToken(tripId, auth.payload.sub);
 
-  return new Response(new Uint8Array(pdf), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="trip-${id}.pdf"`,
-    },
+  // A2: Enqueue and return 202 immediately — no blocking poll loop.
+  const jobId = await enqueuePdfExport({
+    tripId,
+    targetUrl: `${env.CLIENT_URL}/trips/${tripId}`,
+    renderToken,
   });
+
+  return jsonOk({ status: "queued", jobId }, { status: 202 });
 }

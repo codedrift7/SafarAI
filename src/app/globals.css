@@ -36,8 +36,50 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 .mono-type { font-family: var(--font-mono), ui-monospace, monospace; }
 
 .paper-grain {
-  background-image: radial-gradient(rgba(18, 35, 43, 0.05) 0.65px, transparent 0.65px);
-  background-size: 7px 7px;
+  background-image: radial-gradient(rgba(18, 35, 43, 0.09) 0.75px, transparent 0.75px);
+  background-size: 8px 8px;
+}
+
+.destination-hero {
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+}
+
+.destination-hero-bottom,
+.destination-hero-islamabad,
+.destination-hero-swat-valley {
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center bottom !important;
+}
+
+.destination-hero-top,
+.destination-hero-lahore {
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center top !important;
+}
+
+@media (max-width: 768px) {
+  .destination-hero,
+  .destination-hero-bottom,
+  .destination-hero-islamabad,
+  .destination-hero-swat-valley,
+  .destination-hero-top,
+  .destination-hero-lahore {
+    background-attachment: scroll !important;
+  }
+  .destination-hero,
+  .destination-hero-bottom,
+  .destination-hero-swat-valley,
+  .destination-hero-top,
+  .destination-hero-lahore {
+    background-position: center center !important;
+  }
+  .destination-hero-islamabad {
+    background-position: 65% center !important;
+  }
 }
 
 .lattice {

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "tsx src/server/index.ts",
     "build": "next build && npm run build:server",
-    "start": "cross-env NODE_ENV=production node dist-server/index.js",
+    "start": "cross-env NODE_ENV=production node dist-server/server/index.js",
     "build:server": "tsc -p src/server/tsconfig.server.json && tsc-alias -p src/server/tsconfig.server.json",
     "lint": "eslint .",
     "prisma:generate": "prisma generate",

@@ -5,7 +5,7 @@ import { parseJson } from "@/server/route-utils";
 import { updateTripSchema } from "@/server/validators";
 import { toTrip } from "@/server/serialize";
 import { requireTripAccess, tripInclude } from "@/server/trip-service";
-import { requireAuth } from "@/server/auth";
+import { requireAuth, requireAuthOrRenderToken } from "@/server/auth";
 
 function slugify(value: string): string {
   return value
@@ -17,9 +17,11 @@ function slugify(value: string): string {
 }
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requireAuth();
-  if (!auth.ok) return auth.response;
   const { id } = await params;
+
+  // A1e: Accept either a normal cookie session or a render token scoped to this trip.
+  const auth = await requireAuthOrRenderToken(id);
+  if (!auth.ok) return auth.response;
 
   const access = await requireTripAccess(id, auth.payload.sub);
   if (!access.ok) return access.response;
@@ -60,6 +62,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       coverImageUrl: parsed.data.coverImageUrl,
       isPublic: parsed.data.isPublic,
       shareToken: nextShareToken,
+      // B5d: persist partySize and vibe on update
+      partySize: parsed.data.partySize,
+      vibe: parsed.data.vibe,
     },
     include: tripInclude,
   });
