@@ -445,7 +445,7 @@ export const tripTemplates: TripTemplate[] = [
     tags: ["weekend", "hiking", "culture", "easy access"],
     priceTier: "BUDGET",
     coverImageUrl:
-      "https://images.unsplash.com/photo-1655841182960-d881381be362?auto=format&fit=crop&w=1800&q=85",
+      "https://i.pinimg.com/736x/3b/9a/64/3b9a64dd0b62f65d359e8c573de185bc.jpg",
     description:
       "A compact two-day introduction to the capital: morning hikes in the Margalla Hills, Mughal-era village lanes, and the city's best viewpoints.",
     itineraryJson: {

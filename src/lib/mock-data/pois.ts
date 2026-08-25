@@ -28,7 +28,7 @@ export const pois: POI[] = [
     safetyNotes:
       "Wear a buoyancy aid for boat trips and ask locally about wind conditions before going out on the water.",
     photos: [
-      "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1689388259449-9dd3a333d09d?q=80&w=1071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ],
     source: "curated",
     verifiedAt,
@@ -50,7 +50,7 @@ export const pois: POI[] = [
     avgVisitHours: 1.5,
     entryFeePkr: 1200,
     photos: [
-      "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1400&q=85",
+      "https://tripako.com/wp-content/uploads/2020/12/baltit-2-300x300.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -72,7 +72,7 @@ export const pois: POI[] = [
     avgVisitHours: 2,
     entryFeePkr: 1000,
     photos: [
-      "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1400&q=85",
+      "https://northbackend.northonwheels.com/storage/uploads/Altit%20Fort%20Hunza%20Valley%20(2).jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -96,7 +96,7 @@ export const pois: POI[] = [
     safetyNotes:
       "The final climb is steep and narrow. Use a local driver after dark and carry a warm layer even in summer.",
     photos: [
-      "https://images.unsplash.com/photo-1464278533981-50106e6176b1?auto=format&fit=crop&w=1400&q=85",
+      "https://northbackend.northonwheels.com/storage/uploads/image_4976.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -118,7 +118,7 @@ export const pois: POI[] = [
     avgVisitHours: 1,
     entryFeePkr: 0,
     photos: [
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1400&q=85",
+      "https://images.pexels.com/photos/35061795/pexels-photo-35061795.jpeg?_gl=1*990t3a*_ga*NDQ1MTUwMjU4LjE3ODczMzcyMjg.*_ga_8JE65Q40S6*czE3ODc2MDA2NTEkbzckZzEkdDE3ODc2MDM0NDkkajIzJGwwJGgw",
     ],
     source: "curated",
     verifiedAt,
@@ -142,7 +142,7 @@ export const pois: POI[] = [
     safetyNotes:
       "Cross only when the bridge is open and conditions are calm. It is not suitable for anyone uncomfortable with exposed heights.",
     photos: [
-      "https://images.unsplash.com/photo-1486911278844-a81c5267e227?auto=format&fit=crop&w=1400&q=85",
+      "https://naturehikepakistan.pk/wp-content/uploads/2025/02/9dab601c92-min.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -166,7 +166,7 @@ export const pois: POI[] = [
     safetyNotes:
       "The road typically closes with winter snow. Go only after checking current official/local road status; altitude symptoms are common at this height.",
     photos: [
-      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1400&q=85",
+      "https://naturehikepakistan.pk/wp-content/uploads/2024/03/khunjerab-pass-min-600x600.jpeg",
     ],
     source: "curated",
     verifiedAt,
@@ -195,7 +195,7 @@ export const pois: POI[] = [
     safetyNotes:
       "High altitude, sparse services and changing border-area rules make this an expedition-style activity, not a casual day trip.",
     photos: [
-      "https://images.unsplash.com/photo-1464278533981-50106e6176b1?auto=format&fit=crop&w=1400&q=85",
+      "https://www.apricottours.pk/wp-content/uploads/2024/06/View-back-down-the-Mintaka-Valley-during-the-climb-to-the-Mintaka-Pass.jpeg",
     ],
     source: "curated",
     verifiedAt,
@@ -219,7 +219,7 @@ export const pois: POI[] = [
     avgVisitHours: 2,
     entryFeePkr: 1500,
     photos: [
-      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1400&q=85",
+      "https://i.pinimg.com/1200x/3f/d7/65/3fd765ccfc05ae7ca84c7b2f1c759a1d.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -241,7 +241,7 @@ export const pois: POI[] = [
     avgVisitHours: 2.5,
     entryFeePkr: 500,
     photos: [
-      "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1400&q=85",
+      "https://i.pinimg.com/1200x/1d/ad/87/1dad87180d70fb2c368b221bd9aff898.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -263,7 +263,7 @@ export const pois: POI[] = [
     avgVisitHours: 2,
     entryFeePkr: 1000,
     photos: [
-      "https://images.unsplash.com/photo-1530789253388-582c481c54b0?auto=format&fit=crop&w=1400&q=85",
+      "https://www.travelertrails.com/wp-content/uploads/2022/09/1565482804-1.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -287,7 +287,7 @@ export const pois: POI[] = [
     safetyNotes:
       "Open roughly June to September only. Bring warm layers, sun protection, water and enough time to acclimatise to the altitude.",
     photos: [
-      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1400&q=85",
+      "https://i.pinimg.com/1200x/14/3a/cc/143acc22cf9dc97ea8bd3ba1e9ad3c33.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -309,7 +309,7 @@ export const pois: POI[] = [
     avgVisitHours: 2,
     entryFeePkr: 300,
     photos: [
-      "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1400&q=85",
+      "https://i.pinimg.com/1200x/ef/7e/86/ef7e86474524cf6c8bbfb1fc2cf18608.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -333,7 +333,7 @@ export const pois: POI[] = [
     safetyNotes:
       "Use an experienced local 4x4 driver; road surfaces and stream crossings change with weather.",
     photos: [
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=85",
+      "https://i.pinimg.com/736x/10/ad/c4/10adc45dc71cef3aab2d2364d1db75dc.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -355,7 +355,7 @@ export const pois: POI[] = [
     avgVisitHours: 1.5,
     entryFeePkr: 0,
     photos: [
-      "https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=1400&q=85",
+      "https://i.pinimg.com/1200x/60/3f/98/603f9885849ae579d897bf029ccbb436.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -377,7 +377,7 @@ export const pois: POI[] = [
     avgVisitHours: 1.5,
     entryFeePkr: 0,
     photos: [
-      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1400&q=85",
+      "https://i.pinimg.com/1200x/9d/b5/ef/9db5ef67015fc5d97faa37043af41224.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -406,7 +406,7 @@ export const pois: POI[] = [
     safetyNotes:
       "A high-altitude, multi-day expedition requiring physical preparation, guides, insurance and contingency days for weather.",
     photos: [
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1400&q=85",
+      "https://i.pinimg.com/736x/d2/21/22/d2212292090b0f3bc7a9ab1e436de081.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -435,7 +435,7 @@ export const pois: POI[] = [
     safetyNotes:
       "Glacier travel, river crossings and altitude demand expedition experience, guides, insurance and weather buffers.",
     photos: [
-      "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=1400&q=85",
+      "https://hunzaadventuretours.com/wp-content/uploads/2017/01/biofo-6.jpg",
     ],
     source: "curated",
     verifiedAt,
@@ -461,7 +461,7 @@ export const pois: POI[] = [
     safetyNotes:
       "Dress modestly, remove shoes before entering prayer areas and plan around Friday prayers and prayer times.",
     photos: [
-      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1648060348805-fb59b112465d?q=80&w=727&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ],
     source: "google_places",
     verifiedAt,
@@ -483,7 +483,7 @@ export const pois: POI[] = [
     avgVisitHours: 2.5,
     entryFeePkr: 1000,
     photos: [
-      "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1711980057309-d777c92a5804?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ],
     source: "google_places",
     verifiedAt,
@@ -507,7 +507,7 @@ export const pois: POI[] = [
     safetyNotes:
       "Stay aware of traffic in narrow lanes and ask before photographing people or private spaces.",
     photos: [
-      "https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1400&q=85",
+      "https://flypakistan.pk/oldflypak/assets/img/attractions/Delhi%20Gate%20Market.png",
     ],
     source: "google_places",
     verifiedAt,
@@ -529,7 +529,7 @@ export const pois: POI[] = [
     avgVisitHours: 1.5,
     entryFeePkr: 500,
     photos: [
-      "https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1400&q=85",
+      "https://walledcitylahore.gop.pk/wp-content/uploads/2024/06/Shalimar-scaled.jpg",
     ],
     source: "google_places",
     verifiedAt,
@@ -553,7 +553,7 @@ export const pois: POI[] = [
     safetyNotes:
       "This is an active religious site: dress modestly, remove shoes and keep visits respectful around prayers.",
     photos: [
-      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=1400&q=85",
+      "https://images.pexels.com/photos/6153204/pexels-photo-6153204.jpeg?_gl=1*blaxb9*_ga*NDQ1MTUwMjU4LjE3ODczMzcyMjg.*_ga_8JE65Q40S6*czE3ODc2MDA2NTEkbzckZzEkdDE3ODc2MDcyMzEkajU5JGwwJGgw",
     ],
     source: "google_places",
     verifiedAt,
@@ -577,7 +577,7 @@ export const pois: POI[] = [
     safetyNotes:
       "Dress conservatively, avoid disruptive photography and be prepared for dense crowds, especially on Thursday evenings.",
     photos: [
-      "https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1400&q=85",
+      "https://i.pinimg.com/736x/85/f3/b9/85f3b914516e8f76b81576a5f882975a.jpg",
     ],
     source: "google_places",
     verifiedAt,
@@ -601,7 +601,7 @@ export const pois: POI[] = [
     safetyNotes:
       "Keep valuables secure in crowded lanes and agree on prices before purchasing or taking a rickshaw.",
     photos: [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=85",
+      "https://i.pinimg.com/1200x/93/41/ee/9341ee1945c85ac3b31d744d2db0cb10.jpg",
     ],
     source: "google_places",
     verifiedAt,
@@ -623,7 +623,7 @@ export const pois: POI[] = [
     avgVisitHours: 1.5,
     entryFeePkr: 0,
     photos: [
-      "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1400&q=85",
+      "https://scontent.fisb17-1.fna.fbcdn.net/v/t39.30808-6/473020877_621559860813776_6853000488239866790_n.jpg?stp=dst-jpg_tt6&cstp=mx2000x1328&ctp=s2000x1328&_nc_cat=106&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=833d8c&_nc_ohc=Mys_6aHmj1oQ7kNvwG4A506&_nc_oc=AdqxRzuziXRdWbdU65d8OUBJYg0QhZP-RHM99F3Xqj0WvV_tEe-hliN_MWPQa0rbH88&_nc_zt=23&_nc_ht=scontent.fisb17-1.fna&_nc_gid=FVbMm7fTi8XBtn4HdKZO6g&_nc_ss=7b2a8&oh=00_AQFCkVLXXHUO4xnKxOq1U9d8tfp3_-3SBWFFLY6l_AG-cg&oe=6A929DE3",
     ],
     source: "google_places",
     verifiedAt,
@@ -645,75 +645,75 @@ export const pois: POI[] = [
     avgVisitHours: 1,
     entryFeePkr: 0,
     photos: [
-      "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=1400&q=85",
+      "https://images.pexels.com/photos/11416097/pexels-photo-11416097.jpeg?_gl=1*vwdz4o*_ga*NDQ1MTUwMjU4LjE3ODczMzcyMjg.*_ga_8JE65Q40S6*czE3ODc2MDA2NTEkbzckZzEkdDE3ODc2MDcxNjkkajUzJGwwJGgw",
     ],
     source: "google_places",
     verifiedAt,
   },
   // Swat Valley
-  { id: "poi-swat-museum", name: "Swat Museum", slug: "swat-museum", regionId: "region-swat-valley", category: "MUSEUM", latitude: 34.767, longitude: 72.361, description: "Contains rich artifacts from the ancient Gandhara civilization.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN", "WINTER"], altitudeMeters: 980, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 500, photos: ["https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-mingora-bazaar", name: "Mingora Bazaar", slug: "mingora-bazaar", regionId: "region-swat-valley", category: "BAZAAR", latitude: 34.771, longitude: 72.360, description: "Bustling commercial hub of Swat, famous for local handicrafts and emeralds.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN", "WINTER"], altitudeMeters: 984, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-malam-jabba", name: "Malam Jabba Ski Resort", slug: "malam-jabba-ski-resort", regionId: "region-swat-valley", category: "HILL_STATION", latitude: 34.799, longitude: 72.572, description: "One of the few ski resorts in Pakistan offering stunning snowy landscapes.", bestSeasons: ["WINTER"], altitudeMeters: 2804, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 4, entryFeePkr: 1000, photos: ["https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-fizagat-park", name: "Fizagat Park", slug: "fizagat-park", regionId: "region-swat-valley", category: "VIEWPOINT", latitude: 34.789, longitude: 72.385, description: "A popular recreational park situated along the Swat River.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN"], altitudeMeters: 980, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 50, photos: ["https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-mahodand-lake", name: "Mahodand Lake", slug: "mahodand-lake", regionId: "region-swat-valley", category: "LAKE", latitude: 35.714, longitude: 72.650, description: "A scenic alpine lake accessible by a thrilling jeep ride from Kalam.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 2865, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 3, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-ushu-forest", name: "Ushu Forest", slug: "ushu-forest", regionId: "region-swat-valley", category: "VALLEY", latitude: 35.539, longitude: 72.593, description: "A dense pine forest offering picturesque walks in the Ushu valley.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 2300, requiresPermit: false, roadCondition: "UNPAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-swat-emerald-mines", name: "Swat Emerald Mines viewpoint", slug: "swat-emerald-mines-viewpoint", regionId: "region-swat-valley", category: "VIEWPOINT", latitude: 34.773, longitude: 72.367, description: "Viewpoint overlooking the historic emerald mines near Mingora.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN", "WINTER"], altitudeMeters: 1000, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1464278533981-50106e6176b1?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
+  { id: "poi-swat-museum", name: "Swat Museum", slug: "swat-museum", regionId: "region-swat-valley", category: "MUSEUM", latitude: 34.767, longitude: 72.361, description: "Contains rich artifacts from the ancient Gandhara civilization.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN", "WINTER"], altitudeMeters: 980, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 500, photos: ["https://www.pakistantraveler.com/wp-content/uploads/2020/06/Swat-Museum-1536x1024.jpg"], source: "curated", verifiedAt },
+  { id: "poi-mingora-bazaar", name: "Mingora Bazaar", slug: "mingora-bazaar", regionId: "region-swat-valley", category: "BAZAAR", latitude: 34.771, longitude: 72.360, description: "Bustling commercial hub of Swat, famous for local handicrafts and emeralds.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN", "WINTER"], altitudeMeters: 984, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://i.pinimg.com/736x/31/04/8f/31048f06afb98edb516d562223577a12.jpg"], source: "curated", verifiedAt },
+  { id: "poi-malam-jabba", name: "Malam Jabba Ski Resort", slug: "malam-jabba-ski-resort", regionId: "region-swat-valley", category: "HILL_STATION", latitude: 34.799, longitude: 72.572, description: "One of the few ski resorts in Pakistan offering stunning snowy landscapes.", bestSeasons: ["WINTER"], altitudeMeters: 2804, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 4, entryFeePkr: 1000, photos: ["https://i.pinimg.com/1200x/04/75/31/047531993172744004878517f45adcf2.jpg"], source: "curated", verifiedAt },
+  { id: "poi-fizagat-park", name: "Fizagat Park", slug: "fizagat-park", regionId: "region-swat-valley", category: "VIEWPOINT", latitude: 34.789, longitude: 72.385, description: "A popular recreational park situated along the Swat River.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN"], altitudeMeters: 980, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 50, photos: ["https://kommodo.ai/i/4I28BOmcCNdf6cLaKmNq"], source: "curated", verifiedAt },
+  { id: "poi-mahodand-lake", name: "Mahodand Lake", slug: "mahodand-lake", regionId: "region-swat-valley", category: "LAKE", latitude: 35.714, longitude: 72.650, description: "A scenic alpine lake accessible by a thrilling jeep ride from Kalam.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 2865, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 3, entryFeePkr: 0, photos: ["https://i.pinimg.com/736x/9c/ed/e8/9cede887cc50aed0611b496569ae1ff7.jpg"], source: "curated", verifiedAt },
+  { id: "poi-ushu-forest", name: "Ushu Forest", slug: "ushu-forest", regionId: "region-swat-valley", category: "VALLEY", latitude: 35.539, longitude: 72.593, description: "A dense pine forest offering picturesque walks in the Ushu valley.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 2300, requiresPermit: false, roadCondition: "UNPAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://i.pinimg.com/736x/0a/a9/68/0aa968c641c0ffd937ad477545d64e74.jpg"], source: "curated", verifiedAt },
+  { id: "poi-swat-emerald-mines", name: "Swat Emerald Mines viewpoint", slug: "swat-emerald-mines-viewpoint", regionId: "region-swat-valley", category: "VIEWPOINT", latitude: 34.773, longitude: 72.367, description: "Viewpoint overlooking the historic emerald mines near Mingora.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN", "WINTER"], altitudeMeters: 1000, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://www.mindat.org/imagecache/30/3d/06584960017271980233608.jpg"], source: "curated", verifiedAt },
 
   // Islamabad
-  { id: "poi-faisal-mosque", name: "Faisal Mosque", slug: "faisal-mosque", regionId: "region-islamabad", category: "MOSQUE", latitude: 33.729, longitude: 73.037, description: "An iconic, modern mosque nestled at the foothills of the Margalla Hills.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 600, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1635016288720-c52507b9a717?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
+  { id: "poi-faisal-mosque", name: "Faisal Mosque", slug: "faisal-mosque", regionId: "region-islamabad", category: "MOSQUE", latitude: 33.729, longitude: 73.037, description: "An iconic, modern mosque nestled at the foothills of the Margalla Hills.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 600, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://i.pinimg.com/736x/2e/12/20/2e12208f2efed9d94e3767557763627e.jpg"], source: "curated", verifiedAt },
   { id: "poi-margalla-trail-5", name: "Margalla Hills Trail 5", slug: "margalla-hills-trail-5", regionId: "region-islamabad", category: "NATIONAL_PARK", latitude: 33.738, longitude: 73.076, description: "A popular hiking trail with a freshwater stream.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 650, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 3, entryFeePkr: 0, photos: ["https://www.apricottours.pk/wp-content/uploads/2015/02/Margalla-Hills-Trail-5-Hiking-Tour-34.jpg"], source: "curated", verifiedAt },
-  { id: "poi-pakistan-monument", name: "Pakistan Monument", slug: "pakistan-monument", regionId: "region-islamabad", category: "CITY_LANDMARK", latitude: 33.693, longitude: 73.068, description: "A blooming flower-shaped monument symbolizing the provinces of Pakistan.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 550, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 50, photos: ["https://images.unsplash.com/photo-1655841182960-d881381be362?auto=format&fit=crop&w=1800&q=85"], source: "curated", verifiedAt },
+  { id: "poi-pakistan-monument", name: "Pakistan Monument", slug: "pakistan-monument", regionId: "region-islamabad", category: "CITY_LANDMARK", latitude: 33.693, longitude: 73.068, description: "A blooming flower-shaped monument symbolizing the provinces of Pakistan.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 550, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 50, photos: ["https://i.pinimg.com/736x/3b/9a/64/3b9a64dd0b62f65d359e8c573de185bc.jpg"], source: "curated", verifiedAt },
   { id: "poi-lok-virsa-museum", name: "Lok Virsa Museum", slug: "lok-virsa-museum", regionId: "region-islamabad", category: "MUSEUM", latitude: 33.685, longitude: 73.069, description: "Museum showcasing the cultural heritage of Pakistan.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 550, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 500, photos: ["https://chakorventures.com/wp-content/uploads/2025/11/IMG_0819-1024x682.jpg"], source: "curated", verifiedAt },
   { id: "poi-daman-e-koh", name: "Daman-e-Koh viewpoint", slug: "daman-e-koh-viewpoint", regionId: "region-islamabad", category: "VIEWPOINT", latitude: 33.739, longitude: 73.055, description: "A hilltop garden offering panoramic views of Islamabad.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 730, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://chakorventures.com/wp-content/uploads/2026/01/ambiance-compliments.jpg"], source: "curated", verifiedAt },
   { id: "poi-saidpur-village", name: "Saidpur Village", slug: "saidpur-village", regionId: "region-islamabad", category: "CITY_LANDMARK", latitude: 33.743, longitude: 73.067, description: "A restored historic Mughal-era village with charming cafes.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 620, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkw1STdKiGX9eapXPOTtdOtMBvbQ732l60zv9x2KZdpr-kzsOn6ALdkscJrfpXVLZdWrAxCG_H3OrlHc7rj33NH4Y29fHrydSX6iq4mNKfcyUztF9oFk01Qbm4LVlQIShR4AB1X=s1360-w1360-h1020-rw"], source: "curated", verifiedAt },
-  { id: "poi-trail-3", name: "Trail 3 (Margalla)", slug: "trail-3-margalla", regionId: "region-islamabad", category: "NATIONAL_PARK", latitude: 33.733, longitude: 73.067, description: "A steep and challenging but highly rewarding hike in the Margalla Hills.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 650, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2.5, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
+  { id: "poi-trail-3", name: "Trail 3 (Margalla)", slug: "trail-3-margalla", regionId: "region-islamabad", category: "NATIONAL_PARK", latitude: 33.733, longitude: 73.067, description: "A steep and challenging but highly rewarding hike in the Margalla Hills.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 650, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2.5, entryFeePkr: 0, photos: ["https://visitsilkroad.org/wp-content/uploads/2023/09/Hiking-Margalla-Hills-2.jpg"], source: "curated", verifiedAt },
 
   // Naran & Kaghan
-  { id: "poi-saiful-malook", name: "Lake Saif-ul-Malook", slug: "lake-saif-ul-malook", regionId: "region-naran-kaghan", category: "LAKE", latitude: 34.873, longitude: 73.695, description: "A legendary alpine lake surrounded by snow-capped peaks.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 3224, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 3, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-lulusar-lake", name: "Lulusar Lake", slug: "lulusar-lake", regionId: "region-naran-kaghan", category: "LAKE", latitude: 35.083, longitude: 73.940, description: "The largest lake in the Kaghan Valley, reflecting the surrounding peaks.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 3410, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-babusar-pass", name: "Babusar Pass", slug: "babusar-pass", regionId: "region-naran-kaghan", category: "MOUNTAIN", latitude: 35.146, longitude: 74.045, description: "High mountain pass connecting Kaghan Valley to Gilgit-Baltistan.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 4173, requiresPermit: false, roadCondition: "SEASONAL_CLOSURE", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-naran-bazaar", name: "Naran Bazaar", slug: "naran-bazaar", regionId: "region-naran-kaghan", category: "BAZAAR", latitude: 34.908, longitude: 73.649, description: "The vibrant center of Naran, filled with local crafts and eateries.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 2409, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-lalazar", name: "Lalazar Plateau", slug: "lalazar-plateau", regionId: "region-naran-kaghan", category: "VIEWPOINT", latitude: 34.954, longitude: 73.715, description: "A beautiful meadow known for its wildflowers and views of Falak Sar.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 3200, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-ansoo-lake", name: "Ansoo Lake viewpoint", slug: "ansoo-lake-viewpoint", regionId: "region-naran-kaghan", category: "LAKE", latitude: 34.814, longitude: 73.676, description: "A teardrop-shaped high altitude lake reached by a challenging trek.", bestSeasons: ["SUMMER"], altitudeMeters: 4126, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 6, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-shogran", name: "Shogran Meadows", slug: "shogran-meadows", regionId: "region-naran-kaghan", category: "HILL_STATION", latitude: 34.624, longitude: 73.465, description: "A lush green plateau surrounded by thick pine forests.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 2362, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 3, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
+  { id: "poi-saiful-malook", name: "Lake Saif-ul-Malook", slug: "lake-saif-ul-malook", regionId: "region-naran-kaghan", category: "LAKE", latitude: 34.873, longitude: 73.695, description: "A legendary alpine lake surrounded by snow-capped peaks.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 3224, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 3, entryFeePkr: 0, photos: ["https://i.pinimg.com/1200x/8d/eb/37/8deb3729c7026df6ad92ab59330fd0be.jpg"], source: "curated", verifiedAt },
+  { id: "poi-lulusar-lake", name: "Lulusar Lake", slug: "lulusar-lake", regionId: "region-naran-kaghan", category: "LAKE", latitude: 35.083, longitude: 73.940, description: "The largest lake in the Kaghan Valley, reflecting the surrounding peaks.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 3410, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://i.pinimg.com/1200x/3b/0e/a3/3b0ea35acc444d6dcb5d5c04e1d19f53.jpg"], source: "curated", verifiedAt },
+  { id: "poi-babusar-pass", name: "Babusar Pass", slug: "babusar-pass", regionId: "region-naran-kaghan", category: "MOUNTAIN", latitude: 35.146, longitude: 74.045, description: "High mountain pass connecting Kaghan Valley to Gilgit-Baltistan.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 4173, requiresPermit: false, roadCondition: "SEASONAL_CLOSURE", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://i.pinimg.com/736x/8b/ae/21/8bae212c4f193c69f3870d5f36229b2a.jpg"], source: "curated", verifiedAt },
+  { id: "poi-naran-bazaar", name: "Naran Bazaar", slug: "naran-bazaar", regionId: "region-naran-kaghan", category: "BAZAAR", latitude: 34.908, longitude: 73.649, description: "The vibrant center of Naran, filled with local crafts and eateries.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 2409, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://i.pinimg.com/736x/23/7f/cf/237fcfbdfb74694e99ffbeb9cbc4896b.jpg"], source: "curated", verifiedAt },
+  { id: "poi-lalazar", name: "Lalazar Plateau", slug: "lalazar-plateau", regionId: "region-naran-kaghan", category: "VIEWPOINT", latitude: 34.954, longitude: 73.715, description: "A beautiful meadow known for its wildflowers and views of Falak Sar.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 3200, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://i.pinimg.com/736x/7b/ce/fb/7bcefb0708bb7d8616329ce3b3d51005.jpg"], source: "curated", verifiedAt },
+  { id: "poi-ansoo-lake", name: "Ansoo Lake viewpoint", slug: "ansoo-lake-viewpoint", regionId: "region-naran-kaghan", category: "LAKE", latitude: 34.814, longitude: 73.676, description: "A teardrop-shaped high altitude lake reached by a challenging trek.", bestSeasons: ["SUMMER"], altitudeMeters: 4126, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 6, entryFeePkr: 0, photos: ["https://i.pinimg.com/1200x/0f/61/a7/0f61a739c3b15a2fecd16a41af376588.jpg"], source: "curated", verifiedAt },
+  { id: "poi-shogran", name: "Shogran Meadows", slug: "shogran-meadows", regionId: "region-naran-kaghan", category: "HILL_STATION", latitude: 34.624, longitude: 73.465, description: "A lush green plateau surrounded by thick pine forests.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 2362, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 3, entryFeePkr: 0, photos: ["https://i.pinimg.com/1200x/30/88/e9/3088e966dad5d29b4c400a2a69780502.jpg"], source: "curated", verifiedAt },
 
   // Peshawar
-  { id: "poi-peshawar-museum", name: "Peshawar Museum", slug: "peshawar-museum", regionId: "region-peshawar", category: "MUSEUM", latitude: 34.007, longitude: 71.558, description: "Renowned for its collection of Gandharan art and Buddhist sculptures.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 331, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 500, photos: ["https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-qissa-khwani", name: "Qissa Khwani Bazaar", slug: "qissa-khwani-bazaar", regionId: "region-peshawar", category: "BAZAAR", latitude: 34.004, longitude: 71.572, description: "The famous Bazaar of Storytellers, rich in history and tea houses.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 331, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-bala-hisar", name: "Bala Hisar Fort", slug: "bala-hisar-fort", regionId: "region-peshawar", category: "FORT", latitude: 34.012, longitude: 71.568, description: "An imposing fort providing panoramic views of the city of Peshawar.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 331, requiresPermit: true, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-mahabat-khan", name: "Mahabat Khan Mosque", slug: "mahabat-khan-mosque", regionId: "region-peshawar", category: "MOSQUE", latitude: 34.006, longitude: 71.574, description: "A magnificent 17th-century Mughal mosque tucked away in the old city.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 331, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-gor-khatri", name: "Gor Khatri", slug: "gor-khatri", regionId: "region-peshawar", category: "ARCHAEOLOGICAL_SITE", latitude: 34.009, longitude: 71.581, description: "An ancient site holding layers of history from the Mauryan to Mughal eras.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 331, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-old-city-walls", name: "Peshawar Old City Walls", slug: "peshawar-old-city-walls", regionId: "region-peshawar", category: "CITY_LANDMARK", latitude: 34.005, longitude: 71.578, description: "Remnants of the historic walled enclosures of ancient Peshawar.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 331, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
+  { id: "poi-peshawar-museum", name: "Peshawar Museum", slug: "peshawar-museum", regionId: "region-peshawar", category: "MUSEUM", latitude: 34.007, longitude: 71.558, description: "Renowned for its collection of Gandharan art and Buddhist sculptures.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 331, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 500, photos: ["https://www.kpkpeshawar.com/king-include/uploads/2024/06/902858-m8.png"], source: "curated", verifiedAt },
+  { id: "poi-qissa-khwani", name: "Qissa Khwani Bazaar", slug: "qissa-khwani-bazaar", regionId: "region-peshawar", category: "BAZAAR", latitude: 34.004, longitude: 71.572, description: "The famous Bazaar of Storytellers, rich in history and tea houses.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 331, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://flypakistan.pk/oldflypak/assets/img/attractions/Qissa%20Khwani%20Bazaar.jpg"], source: "curated", verifiedAt },
+  { id: "poi-bala-hisar", name: "Bala Hisar Fort", slug: "bala-hisar-fort", regionId: "region-peshawar", category: "FORT", latitude: 34.012, longitude: 71.568, description: "An imposing fort providing panoramic views of the city of Peshawar.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 331, requiresPermit: true, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://i.pinimg.com/1200x/31/cd/19/31cd192c4cd31c07f9f73169a6cf5d9f.jpg"], source: "curated", verifiedAt },
+  { id: "poi-mahabat-khan", name: "Mahabat Khan Mosque", slug: "mahabat-khan-mosque", regionId: "region-peshawar", category: "MOSQUE", latitude: 34.006, longitude: 71.574, description: "A magnificent 17th-century Mughal mosque tucked away in the old city.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 331, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1679861445408-7fe086b45fe9?q=80&w=1033&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"], source: "curated", verifiedAt },
+  { id: "poi-gor-khatri", name: "Gor Khatri", slug: "gor-khatri", regionId: "region-peshawar", category: "ARCHAEOLOGICAL_SITE", latitude: 34.009, longitude: 71.581, description: "An ancient site holding layers of history from the Mauryan to Mughal eras.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 331, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 0, photos: ["https://scontent.fisb17-1.fna.fbcdn.net/v/t39.30808-6/481122661_28667437932902785_3180681550568260170_n.jpg?stp=dst-jpg_tt6&cstp=mx1600x1200&ctp=s1600x1200&_nc_cat=100&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=833d8c&_nc_ohc=Jty8cxCd-Y0Q7kNvwHo1nvv&_nc_oc=AdrAfVvl67Apn0pX2SyGlMu3FHLJ4HxJV9FiStXWHqzuRvCH8Wji9cp84jR3oIT0BVg&_nc_zt=23&_nc_ht=scontent.fisb17-1.fna&_nc_gid=Mz-nE_07g2OUai-TcC8Z_g&_nc_ss=7b2a8&oh=00_AQEiKt3sbGO4eMwsycQRD5mTahSNrYcm9Nlb4cI4axV0xQ&oe=6A933DEA"], source: "curated", verifiedAt },
+  { id: "poi-old-city-walls", name: "Peshawar Old City Walls", slug: "peshawar-old-city-walls", regionId: "region-peshawar", category: "CITY_LANDMARK", latitude: 34.005, longitude: 71.578, description: "Remnants of the historic walled enclosures of ancient Peshawar.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 331, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://i.pinimg.com/736x/1d/cb/d3/1dcbd34571d9f2dc50ce61a93f0c7ee2.jpg"], source: "curated", verifiedAt },
 
   // Chitral & Kalash
-  { id: "poi-kalash-valley", name: "Kalash Valley (Bumburet)", slug: "kalash-valley-bumburet", regionId: "region-chitral-kalash", category: "VALLEY", latitude: 35.683, longitude: 71.666, description: "The largest of the Kalash valleys, known for its unique culture and festivals.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN"], altitudeMeters: 1670, requiresPermit: true, roadCondition: "UNPAVED", avgVisitHours: 6, entryFeePkr: 1000, photos: ["https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
+  { id: "poi-kalash-valley", name: "Kalash Valley (Bumburet)", slug: "kalash-valley-bumburet", regionId: "region-chitral-kalash", category: "VALLEY", latitude: 35.683, longitude: 71.666, description: "The largest of the Kalash valleys, known for its unique culture and festivals.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN"], altitudeMeters: 1670, requiresPermit: true, roadCondition: "UNPAVED", avgVisitHours: 6, entryFeePkr: 1000, photos: ["https://www.laurewanders.com/wp-content/uploads/2024/09/Kalash-Valleys-00004.jpg"], source: "curated", verifiedAt },
   { id: "poi-chitral-fort", name: "Chitral Fort", slug: "chitral-fort", regionId: "region-chitral-kalash", category: "FORT", latitude: 35.851, longitude: 71.785, description: "Historical seat of the Mehtar of Chitral by the river.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN"], altitudeMeters: 1494, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://scontent.fisb1-2.fna.fbcdn.net/v/t1.6435-9/84170403_3103109089734554_1715535625945350144_n.jpg?stp=dst-jpg_tt6&cstp=mx2048x1364&ctp=p180x540&_nc_cat=104&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=833d8c&_nc_ohc=yuUzYbPvag0Q7kNvwE0yO0k&_nc_oc=Adql3By3IdpeWFCVbMSXOU5qkli6IyfgqTbl1-1GDafCrY2Rm5Y2sTqOUL4Fad89yUw&_nc_zt=23&_nc_ht=scontent.fisb1-2.fna&_nc_gid=W-TQCfPMGnFyw9xyTewUlw&_nc_ss=7a2a8&oh=00_AQG0H--c_ovDDXj3JcjJhrBZleQ7bRt0LmB83LWTTLp7gw&oe=6AB2F99D"], source: "curated", verifiedAt },
   { id: "poi-shandur-pass", name: "Shandur Pass", slug: "shandur-pass", regionId: "region-chitral-kalash", category: "MOUNTAIN", latitude: 36.082, longitude: 72.532, description: "Famous for the annual polo festival at the world's highest polo ground.", bestSeasons: ["SUMMER"], altitudeMeters: 3700, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 4, entryFeePkr: 0, photos: ["https://visitsilkroad.org/wp-content/uploads/2021/05/Shandur-Pass-Pakistan-1.jpg"], source: "curated", verifiedAt },
-  { id: "poi-garam-chashma", name: "Garam Chashma Hot Springs", slug: "garam-chashma-hot-springs", regionId: "region-chitral-kalash", category: "VALLEY", latitude: 35.989, longitude: 71.439, description: "Therapeutic hot springs nestled in the Hindu Kush mountains.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN"], altitudeMeters: 1859, requiresPermit: false, roadCondition: "UNPAVED", avgVisitHours: 3, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
+  { id: "poi-garam-chashma", name: "Garam Chashma Hot Springs", slug: "garam-chashma-hot-springs", regionId: "region-chitral-kalash", category: "VALLEY", latitude: 35.989, longitude: 71.439, description: "Therapeutic hot springs nestled in the Hindu Kush mountains.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN"], altitudeMeters: 1859, requiresPermit: false, roadCondition: "UNPAVED", avgVisitHours: 3, entryFeePkr: 0, photos: ["https://visitchitralvalley.com/wp-content/uploads/2023/10/Garam-Chashma-Valley-1536x950.jpg"], source: "curated", verifiedAt },
   { id: "poi-ayun-valley", name: "Ayun Valley", slug: "ayun-valley", regionId: "region-chitral-kalash", category: "VALLEY", latitude: 35.727, longitude: 71.777, description: "A lush green valley serving as the gateway to the Kalash valleys.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN"], altitudeMeters: 1400, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://media.licdn.com/dms/image/v2/C4D22AQEgsIZ37IRQ6w/feedshare-shrink_800/feedshare-shrink_800/0/1575878650513?e=1788998400&v=beta&t=qwbhyYDHwazmy2-KeNdNJIAdyjbF5sFUrwJjEdeQXzQ"], source: "curated", verifiedAt },
   { id: "poi-chitral-bazaar", name: "Chitral Bazaar", slug: "chitral-bazaar", regionId: "region-chitral-kalash", category: "BAZAAR", latitude: 35.852, longitude: 71.789, description: "Traditional market famous for Chitrali caps and handicrafts.", bestSeasons: ["SPRING", "SUMMER", "AUTUMN"], altitudeMeters: 1494, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://www.chitraltravel.com/images/shopping/6.jpg"], source: "curated", verifiedAt },
 
   // Fairy Meadows
-  { id: "poi-fairy-meadows", name: "Fairy Meadows", slug: "fairy-meadows", regionId: "region-fairy-meadows-nanga-parbat", category: "VALLEY", latitude: 35.390, longitude: 74.577, description: "A breathtaking alpine pasture offering unparalleled views of Nanga Parbat.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 3300, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 24, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-nanga-parbat-bc", name: "Nanga Parbat Base Camp", slug: "nanga-parbat-base-camp", regionId: "region-fairy-meadows-nanga-parbat", category: "MOUNTAIN", latitude: 35.334, longitude: 74.582, description: "An achievable day trek from Fairy Meadows to the base of the Killer Mountain.", bestSeasons: ["SUMMER"], altitudeMeters: 3967, requiresPermit: false, roadCondition: "UNPAVED", avgVisitHours: 8, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-raikot-bridge", name: "Raikot Bridge viewpoint", slug: "raikot-bridge-viewpoint", regionId: "region-fairy-meadows-nanga-parbat", category: "VIEWPOINT", latitude: 35.485, longitude: 74.590, description: "The starting point for the legendary jeep track up to Fairy Meadows.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 1400, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1464278533981-50106e6176b1?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-beyal-camp", name: "Beyal Camp", slug: "beyal-camp", regionId: "region-fairy-meadows-nanga-parbat", category: "VIEWPOINT", latitude: 35.361, longitude: 74.579, description: "A serene camping spot situated en route to the Nanga Parbat Base Camp.", bestSeasons: ["SUMMER"], altitudeMeters: 3500, requiresPermit: false, roadCondition: "UNPAVED", avgVisitHours: 3, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-tattoo-village", name: "Tattoo Village viewpoint", slug: "tattoo-village-viewpoint", regionId: "region-fairy-meadows-nanga-parbat", category: "VIEWPOINT", latitude: 35.426, longitude: 74.585, description: "The end of the jeep track and starting point of the hike to Fairy Meadows.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 2300, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1464278533981-50106e6176b1?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-rupal-valley", name: "Rupal Valley", slug: "rupal-valley", regionId: "region-fairy-meadows-nanga-parbat", category: "VALLEY", latitude: 35.215, longitude: 74.622, description: "Stunning valley on the southern side of Nanga Parbat with massive rock walls.", bestSeasons: ["SUMMER"], altitudeMeters: 3000, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 12, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
+  { id: "poi-fairy-meadows", name: "Fairy Meadows", slug: "fairy-meadows", regionId: "region-fairy-meadows-nanga-parbat", category: "VALLEY", latitude: 35.390, longitude: 74.577, description: "A breathtaking alpine pasture offering unparalleled views of Nanga Parbat.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 3300, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 24, entryFeePkr: 0, photos: ["https://www.toptravelsights.com/wp-content/uploads/2022/08/Reflection-Lake-Fairy-Meadows-View.jpg"], source: "curated", verifiedAt },
+  { id: "poi-nanga-parbat-bc", name: "Nanga Parbat Base Camp", slug: "nanga-parbat-base-camp", regionId: "region-fairy-meadows-nanga-parbat", category: "MOUNTAIN", latitude: 35.334, longitude: 74.582, description: "An achievable day trek from Fairy Meadows to the base of the Killer Mountain.", bestSeasons: ["SUMMER"], altitudeMeters: 3967, requiresPermit: false, roadCondition: "UNPAVED", avgVisitHours: 8, entryFeePkr: 0, photos: ["https://www.traveladventures.org/countries/pakistan/images/nanga-parbat-base-camp02.jpg"], source: "curated", verifiedAt },
+  { id: "poi-raikot-bridge", name: "Raikot Bridge viewpoint", slug: "raikot-bridge-viewpoint", regionId: "region-fairy-meadows-nanga-parbat", category: "VIEWPOINT", latitude: 35.485, longitude: 74.590, description: "The starting point for the legendary jeep track up to Fairy Meadows.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 1400, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://scontent.fisb17-1.fna.fbcdn.net/v/t39.30808-6/505399353_2158284631284994_8106029128579637974_n.jpg?stp=dst-jpg_tt6&cstp=mx2048x1536&ctp=s2048x1536&_nc_cat=106&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=aa7b47&_nc_ohc=MAHwQ8T3tNYQ7kNvwEZj5OM&_nc_oc=Adp5eiZNeXhdaQm3FjNn90C3aoQyNbDCc2b-SOQMdr_UURgC9ENwhc2DBSDDpwcGkDE&_nc_zt=23&_nc_ht=scontent.fisb17-1.fna&_nc_gid=NxnccbCkYnIImkqs2ONPgQ&_nc_ss=7b2a8&oh=00_AQH7B5JCy7axa4FRZJxn1HroOrtNM0_OFhpM97vLNnDsyA&oe=6A9262D7"], source: "curated", verifiedAt },
+  { id: "poi-beyal-camp", name: "Beyal Camp", slug: "beyal-camp", regionId: "region-fairy-meadows-nanga-parbat", category: "VIEWPOINT", latitude: 35.361, longitude: 74.579, description: "A serene camping spot situated en route to the Nanga Parbat Base Camp.", bestSeasons: ["SUMMER"], altitudeMeters: 3500, requiresPermit: false, roadCondition: "UNPAVED", avgVisitHours: 3, entryFeePkr: 0, photos: ["https://www.blizin.com/public/images/uploads/tourpackage/7-days-tour-to-hunza-fairy-meadows-bayal-camp-TP-545-1623151034.webp"], source: "curated", verifiedAt },
+  { id: "poi-tattoo-village", name: "Tattoo Village viewpoint", slug: "tattoo-village-viewpoint", regionId: "region-fairy-meadows-nanga-parbat", category: "VIEWPOINT", latitude: 35.426, longitude: 74.585, description: "The end of the jeep track and starting point of the hike to Fairy Meadows.", bestSeasons: ["SUMMER", "AUTUMN"], altitudeMeters: 2300, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://lh3.googleusercontent.com/gps-cs-s/AHRPTWlE_wwIMsWqP3B4-6W9GpRaCLrvCit84n7OkIzh4EUaTDN2zWO8U2YC3KjcgJvj39Q21YhX1_A7DjSvC2G3dNeE2kueE5fpOmtBfQ3xc43u_cQ9Hj8V1jxmoqSOTVSieKxW_lc=s762-k-no"], source: "curated", verifiedAt },
+  { id: "poi-rupal-valley", name: "Rupal Valley", slug: "rupal-valley", regionId: "region-fairy-meadows-nanga-parbat", category: "VALLEY", latitude: 35.215, longitude: 74.622, description: "Stunning valley on the southern side of Nanga Parbat with massive rock walls.", bestSeasons: ["SUMMER"], altitudeMeters: 3000, requiresPermit: false, roadCondition: "FOUR_WD_REQUIRED", avgVisitHours: 12, entryFeePkr: 0, photos: ["https://scontent.fisb17-1.fna.fbcdn.net/v/t39.30808-6/522641009_3991799570966830_9192794959518931398_n.jpg?stp=dst-jpg_tt6&cstp=mx2048x1536&ctp=s2048x1536&_nc_cat=107&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=aa7b47&_nc_ohc=NiczqGcc8ZEQ7kNvwHFU1dE&_nc_oc=AdrWpB7pjV6xP0Ftnt6zAdyXTMcUsdkNtV7jkCmjsFdCe17xdek1k-lqW9wsHx621AY&_nc_zt=23&_nc_ht=scontent.fisb17-1.fna&_nc_gid=9H_L8bHeLtE_naid72AHjg&_nc_ss=7b2a8&oh=00_AQFCgcXmdt0MykWnUORraASYXnLQQku1y0hRMwbrlKIMAg&oe=6A927D47"], source: "curated", verifiedAt },
 
   // Multan
-  { id: "poi-shah-rukn-e-alam", name: "Shrine of Shah Rukn-e-Alam", slug: "shrine-of-shah-rukn-e-alam", regionId: "region-multan", category: "SHRINE", latitude: 30.198, longitude: 71.472, description: "An iconic octagonal shrine celebrated for its stunning blue tilework.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 122, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-multan-fort", name: "Multan Fort (Qila Kohna Qasim Bagh)", slug: "multan-fort", regionId: "region-multan", category: "FORT", latitude: 30.199, longitude: 71.472, description: "Remains of the ancient fort housing several prominent shrines.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 122, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-hussain-agahi", name: "Hussain Agahi Bazaar", slug: "hussain-agahi-bazaar", regionId: "region-multan", category: "BAZAAR", latitude: 30.196, longitude: 71.470, description: "One of Multan's oldest and busiest bazaars.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 122, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-shah-shams-tabriz", name: "Tomb of Shah Shams Tabriz", slug: "tomb-of-shah-shams-tabriz", regionId: "region-multan", category: "SHRINE", latitude: 30.207, longitude: 71.481, description: "A revered 14th-century tomb with exceptional glazed brickwork.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 122, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-multan-museum", name: "Multan Museum", slug: "multan-museum", regionId: "region-multan", category: "MUSEUM", latitude: 30.200, longitude: 71.472, description: "Exhibits artifacts from the region's long and varied history.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 122, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-ghanta-ghar", name: "Ghanta Ghar Clock Tower", slug: "ghanta-ghar-clock-tower", regionId: "region-multan", category: "CITY_LANDMARK", latitude: 30.197, longitude: 71.470, description: "A British-era clock tower serving as the city center.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 122, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 0.5, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
+  { id: "poi-shah-rukn-e-alam", name: "Shrine of Shah Rukn-e-Alam", slug: "shrine-of-shah-rukn-e-alam", regionId: "region-multan", category: "SHRINE", latitude: 30.198, longitude: 71.472, description: "An iconic octagonal shrine celebrated for its stunning blue tilework.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 122, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 0, photos: ["https://flypakistan.pk/oldflypak/assets/img/attractions/Tomb%20Shah%20Rukne%20Alam.jpg"], source: "curated", verifiedAt },
+  { id: "poi-multan-fort", name: "Multan Fort (Qila Kohna Qasim Bagh)", slug: "multan-fort", regionId: "region-multan", category: "FORT", latitude: 30.199, longitude: 71.472, description: "Remains of the ancient fort housing several prominent shrines.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 122, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://www.vizit.pk/uploads/blogs/Bab-e-_Qasim_Multan.jpg"], source: "curated", verifiedAt },
+  { id: "poi-hussain-agahi", name: "Hussain Agahi Bazaar", slug: "hussain-agahi-bazaar", regionId: "region-multan", category: "BAZAAR", latitude: 30.196, longitude: 71.470, description: "One of Multan's oldest and busiest bazaars.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 122, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://plain-eeur-prod-public.komododecks.com/202608/25/k0SIJKmSOXgG0xrNlYgD/image.png"], source: "curated", verifiedAt },
+  { id: "poi-shah-shams-tabriz", name: "Tomb of Shah Shams Tabriz", slug: "tomb-of-shah-shams-tabriz", regionId: "region-multan", category: "SHRINE", latitude: 30.207, longitude: 71.481, description: "A revered 14th-century tomb with exceptional glazed brickwork.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 122, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1, entryFeePkr: 0, photos: ["https://www.orientalarchitecture.com/gallery/pakistan/multan/shah-shams-sabzwari/photos/shah-shams-sabzwari07.jpg"], source: "curated", verifiedAt },
+  { id: "poi-multan-museum", name: "Multan Museum", slug: "multan-museum", regionId: "region-multan", category: "MUSEUM", latitude: 30.200, longitude: 71.472, description: "Exhibits artifacts from the region's long and varied history.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 122, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 0, photos: ["https://lh3.googleusercontent.com/gps-cs-s/AHRPTWl2ubdlpSuzFOkmR80gSPFTvJCRMQX68HvfEIObY_WKhTtva3m0kGIOEk1kOfyaoq8CR1yq-C8Y7Mx7hcuUPenJyyID3fBOYH-8C6uXBAfsPKEzqgzf09rJeGAv0v1bHyhHmia6Jg=s1360-w1360-h1020-rw"], source: "curated", verifiedAt },
+  { id: "poi-ghanta-ghar", name: "Ghanta Ghar Clock Tower", slug: "ghanta-ghar-clock-tower", regionId: "region-multan", category: "CITY_LANDMARK", latitude: 30.197, longitude: 71.470, description: "A British-era clock tower serving as the city center.", bestSeasons: ["SPRING", "AUTUMN", "WINTER"], altitudeMeters: 122, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 0.5, entryFeePkr: 0, photos: ["https://webapi.tdcp.gop.pk/uploads/1766471508961-15594781.webp"], source: "curated", verifiedAt },
 
   // Karachi
-  { id: "poi-mazar-e-quaid", name: "Mazar-e-Quaid", slug: "mazar-e-quaid", regionId: "region-karachi", category: "CITY_LANDMARK", latitude: 24.8753, longitude: 67.0409, description: "The iconic white marble mausoleum and final resting place of Muhammad Ali Jinnah.", bestSeasons: ["AUTUMN", "WINTER", "SPRING"], altitudeMeters: 20, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1759323050124-eb669cec0b72?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-clifton-beach", name: "Clifton Beach & Seaview", slug: "clifton-beach-seaview", regionId: "region-karachi", category: "VIEWPOINT", latitude: 24.7937, longitude: 67.0344, description: "Karachi's bustling Arabian Sea shoreline, famous for camel rides, sea breezes, and vibrant evening atmosphere.", bestSeasons: ["AUTUMN", "WINTER", "SPRING"], altitudeMeters: 0, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-mohatta-palace", name: "Mohatta Palace Museum", slug: "mohatta-palace-museum", regionId: "region-karachi", category: "MUSEUM", latitude: 24.8142, longitude: 67.0326, description: "A stunning 1927 Rajasthani-style stone palace showcasing Pakistani art, textiles, and cultural exhibits.", bestSeasons: ["AUTUMN", "WINTER", "SPRING"], altitudeMeters: 15, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 150, photos: ["https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-burns-road", name: "Burns Road Food Street", slug: "burns-road-food-street", regionId: "region-karachi", category: "RESTAURANT", latitude: 24.8582, longitude: 67.0145, description: "The historic epicentre of Karachi street food: Nihari, Haleem, kebabs, Rabri, and legacy eateries.", bestSeasons: ["AUTUMN", "WINTER", "SPRING"], altitudeMeters: 10, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-port-grand", name: "Port Grand", slug: "port-grand", regionId: "region-karachi", category: "CITY_LANDMARK", latitude: 24.8475, longitude: 66.9897, description: "A landscaped pedestrian food and entertainment promenade along the historic Native Jetty harbour.", bestSeasons: ["AUTUMN", "WINTER", "SPRING"], altitudeMeters: 5, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2.5, entryFeePkr: 500, photos: ["https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt },
-  { id: "poi-empress-market", name: "Empress Market", slug: "empress-market", regionId: "region-karachi", category: "BAZAAR", latitude: 24.8622, longitude: 67.0305, description: "A Victorian-era landmark market in Saddar, at the historical heart of colonial Karachi.", bestSeasons: ["AUTUMN", "WINTER", "SPRING"], altitudeMeters: 15, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1400&q=85"], source: "curated", verifiedAt }
+  { id: "poi-mazar-e-quaid", name: "Mazar-e-Quaid", slug: "mazar-e-quaid", regionId: "region-karachi", category: "CITY_LANDMARK", latitude: 24.8753, longitude: 67.0409, description: "The iconic white marble mausoleum and final resting place of Muhammad Ali Jinnah.", bestSeasons: ["AUTUMN", "WINTER", "SPRING"], altitudeMeters: 20, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1611068661807-c850d6a24f62?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"], source: "curated", verifiedAt },
+  { id: "poi-clifton-beach", name: "Clifton Beach & Seaview", slug: "clifton-beach-seaview", regionId: "region-karachi", category: "VIEWPOINT", latitude: 24.7937, longitude: 67.0344, description: "Karachi's bustling Arabian Sea shoreline, famous for camel rides, sea breezes, and vibrant evening atmosphere.", bestSeasons: ["AUTUMN", "WINTER", "SPRING"], altitudeMeters: 0, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://www.travelertrails.com/wp-content/uploads/2022/11/Seaview-Karachi-4.jpg"], source: "curated", verifiedAt },
+  { id: "poi-mohatta-palace", name: "Mohatta Palace Museum", slug: "mohatta-palace-museum", regionId: "region-karachi", category: "MUSEUM", latitude: 24.8142, longitude: 67.0326, description: "A stunning 1927 Rajasthani-style stone palace showcasing Pakistani art, textiles, and cultural exhibits.", bestSeasons: ["AUTUMN", "WINTER", "SPRING"], altitudeMeters: 15, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 150, photos: ["https://images.unsplash.com/photo-1748620802545-6ca9c9fc6fce?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"], source: "curated", verifiedAt },
+  { id: "poi-burns-road", name: "Burns Road Food Street", slug: "burns-road-food-street", regionId: "region-karachi", category: "RESTAURANT", latitude: 24.8582, longitude: 67.0145, description: "The historic epicentre of Karachi street food: Nihari, Haleem, kebabs, Rabri, and legacy eateries.", bestSeasons: ["AUTUMN", "WINTER", "SPRING"], altitudeMeters: 10, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2, entryFeePkr: 0, photos: ["https://scontent.fisb17-1.fna.fbcdn.net/v/t39.30808-6/480226069_1040671588078938_3471743378147055573_n.jpg?stp=dst-jpg_tt6&cstp=mx720x717&ctp=s720x717&_nc_cat=101&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=833d8c&_nc_ohc=NHAFHt_lowkQ7kNvwGmcsDV&_nc_oc=AdpR-NdRsLnzYBQyeXR6tb2Otc-g0hMAX5G3JJdwrQtLq4k-01OGbAJFMZ5P4_ZE5Ls&_nc_zt=23&_nc_ht=scontent.fisb17-1.fna&_nc_gid=3QoB6G6Q0AU6Ho1IQ9KxPw&_nc_ss=7b2a8&oh=00_AQGUe2jN9rkRom--xvT41kyVSnCx97L9NSsR1TuQ40TUCw&oe=6A928174"], source: "curated", verifiedAt },
+  { id: "poi-port-grand", name: "Port Grand", slug: "port-grand", regionId: "region-karachi", category: "CITY_LANDMARK", latitude: 24.8475, longitude: 66.9897, description: "A landscaped pedestrian food and entertainment promenade along the historic Native Jetty harbour.", bestSeasons: ["AUTUMN", "WINTER", "SPRING"], altitudeMeters: 5, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 2.5, entryFeePkr: 500, photos: ["https://www.blizin.com/public/images/uploads/articles/portgrandkarachi-A-1552657610.webp"], source: "curated", verifiedAt },
+  { id: "poi-empress-market", name: "Empress Market", slug: "empress-market", regionId: "region-karachi", category: "BAZAAR", latitude: 24.8622, longitude: 67.0305, description: "A Victorian-era landmark market in Saddar, at the historical heart of colonial Karachi.", bestSeasons: ["AUTUMN", "WINTER", "SPRING"], altitudeMeters: 15, requiresPermit: false, roadCondition: "PAVED", avgVisitHours: 1.5, entryFeePkr: 0, photos: ["https://images.unsplash.com/photo-1707298313985-ab0cbb314957?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"], source: "curated", verifiedAt }
 ];

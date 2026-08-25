@@ -22,7 +22,7 @@ export const sampleHunzaTrip: Trip = {
   pace: "balanced",
   status: "CONFIRMED",
   coverImageUrl:
-    "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=85",
+    "https://i.pinimg.com/736x/8b/ae/21/8bae212c4f193c69f3870d5f36229b2a.jpg",
   isPublic: true,
   shareToken: "hunza-summer-route",
   partySize: 4,
