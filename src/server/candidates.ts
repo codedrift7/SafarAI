@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, type POICategory } from "@prisma/client";
 import { prisma } from "./db";
 import { seasonsForRange } from "./season";
 
@@ -44,7 +44,7 @@ export async function getCandidatePois(params: {
     // filter — deliberately scoped to this one field rather than typing the whole `where`
     // clause as `any` (which previously suppressed findMany's normal return-type inference
     // and was a likely contributor to the implicit-`any` cascade in callers of this function).
-    where.category = { in: params.categoryMix as Prisma.POICategory[] };
+    where.category = { in: params.categoryMix as POICategory[] };
   }
   if (params.excludePermitRequired) {
     where.requiresPermit = false;
