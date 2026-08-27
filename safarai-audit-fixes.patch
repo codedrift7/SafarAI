@@ -1,0 +1,495 @@
+diff --git a/prisma/migrations/20260827120000_add_poi_permit_link_and_verified_at/migration.sql b/prisma/migrations/20260827120000_add_poi_permit_link_and_verified_at/migration.sql
+new file mode 100644
+index 0000000..4173ba9
+--- /dev/null
++++ b/prisma/migrations/20260827120000_add_poi_permit_link_and_verified_at/migration.sql
+@@ -0,0 +1,3 @@
++-- AlterTable
++ALTER TABLE "POI" ADD COLUMN     "permitOfficialLink" TEXT,
++ADD COLUMN     "permitLastVerifiedAt" TIMESTAMP(3);
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index 90613c7..ffcf24c 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -217,6 +217,13 @@ model POI {
+   requiresPermit  Boolean       @default(false)
+   permitAuthority String?
+   permitNotes     String?
++  // Sourced-and-timestamped permit data required by design.md section 6.4. These existed on
++  // the pre-database mock POI data (src/lib/mock-data/pois.ts) and are already read by the
++  // advisory generator (src/lib/domain/advisories.ts) — the columns just never made it into
++  // the schema, so every real (seeded) POI silently had neither. Backfilled via migration
++  // 20260827120000_add_poi_permit_link_and_verified_at.
++  permitOfficialLink   String?
++  permitLastVerifiedAt DateTime?
+   roadCondition   RoadCondition @default(PAVED)
+   avgVisitHours   Float?
+   entryFeePkr     Float?
+diff --git a/prisma/seed-pois.ts b/prisma/seed-pois.ts
+index 2fbdad9..ad08254 100644
+--- a/prisma/seed-pois.ts
++++ b/prisma/seed-pois.ts
+@@ -41,6 +41,8 @@ async function main() {
+         requiresPermit: poi.requiresPermit,
+         permitAuthority: poi.permitAuthority ?? null,
+         permitNotes: poi.permitNotes ?? null,
++        permitOfficialLink: poi.permitOfficialLink ?? null,
++        permitLastVerifiedAt: poi.permitLastVerifiedAt ? new Date(poi.permitLastVerifiedAt) : null,
+         roadCondition: poi.roadCondition,
+         avgVisitHours: poi.avgVisitHours ?? null,
+         entryFeePkr: poi.entryFeePkr ?? null,
+@@ -63,6 +65,8 @@ async function main() {
+         requiresPermit: poi.requiresPermit,
+         permitAuthority: poi.permitAuthority ?? null,
+         permitNotes: poi.permitNotes ?? null,
++        permitOfficialLink: poi.permitOfficialLink ?? null,
++        permitLastVerifiedAt: poi.permitLastVerifiedAt ? new Date(poi.permitLastVerifiedAt) : null,
+         roadCondition: poi.roadCondition,
+         avgVisitHours: poi.avgVisitHours ?? null,
+         entryFeePkr: poi.entryFeePkr ?? null,
+diff --git a/prisma/seed.ts b/prisma/seed.ts
+index 1b49cc4..5dbb433 100644
+--- a/prisma/seed.ts
++++ b/prisma/seed.ts
+@@ -77,6 +77,8 @@ async function main() {
+         requiresPermit: poi.requiresPermit,
+         permitAuthority: poi.permitAuthority ?? null,
+         permitNotes: poi.permitNotes ?? null,
++        permitOfficialLink: poi.permitOfficialLink ?? null,
++        permitLastVerifiedAt: poi.permitLastVerifiedAt ? new Date(poi.permitLastVerifiedAt) : null,
+         roadCondition: poi.roadCondition,
+         avgVisitHours: poi.avgVisitHours ?? null,
+         entryFeePkr: poi.entryFeePkr ?? null,
+diff --git a/src/app/api/v1/activities/route.ts b/src/app/api/v1/activities/route.ts
+index d6462c1..a627bb0 100644
+--- a/src/app/api/v1/activities/route.ts
++++ b/src/app/api/v1/activities/route.ts
+@@ -20,7 +20,7 @@ export async function POST(request: Request) {
+   if (!access.ok) return access.response;
+ 
+   const orderIndex = parsed.data.afterActivityId
+-    ? Math.max(0, day.activities.find((activity) => activity.id === parsed.data.afterActivityId)?.orderIndex ?? day.activities.length - 1) + 1
++    ? Math.max(0, day.activities.find((activity: (typeof day.activities)[number]) => activity.id === parsed.data.afterActivityId)?.orderIndex ?? day.activities.length - 1) + 1
+     : day.activities.length;
+ 
+   if (parsed.data.afterActivityId) {
+diff --git a/src/app/api/v1/trips/[id]/chat/route.ts b/src/app/api/v1/trips/[id]/chat/route.ts
+index 697782c..d07800a 100644
+--- a/src/app/api/v1/trips/[id]/chat/route.ts
++++ b/src/app/api/v1/trips/[id]/chat/route.ts
+@@ -31,6 +31,51 @@ const POI_CATEGORIES = [
+   "VIEWPOINT",
+ ];
+ 
++// Fallback for swap_activity's replacementCriteria when the model passes through free text
++// instead of an exact POICategory value (design.md's own example: "something outdoors").
++// Not full NLP — a small explicit keyword map for the phrasing users are most likely to use.
++// Broad words map to several categories rather than one arbitrary pick; anything unmatched
++// falls through to `undefined` (no category filter), same as the previous behavior.
++const CATEGORY_KEYWORDS: Record<string, string[]> = {
++  OUTDOOR: ["MOUNTAIN", "LAKE", "WATERFALL", "NATIONAL_PARK", "VALLEY", "GLACIER", "VIEWPOINT", "HILL_STATION"],
++  OUTDOORS: ["MOUNTAIN", "LAKE", "WATERFALL", "NATIONAL_PARK", "VALLEY", "GLACIER", "VIEWPOINT", "HILL_STATION"],
++  NATURE: ["MOUNTAIN", "LAKE", "WATERFALL", "NATIONAL_PARK", "VALLEY", "GLACIER", "VIEWPOINT"],
++  ADVENTURE: ["MOUNTAIN", "WATERFALL", "NATIONAL_PARK", "GLACIER"],
++  ADVENTUROUS: ["MOUNTAIN", "WATERFALL", "NATIONAL_PARK", "GLACIER"],
++  HISTORY: ["FORT", "ARCHAEOLOGICAL_SITE", "MUSEUM", "CITY_LANDMARK"],
++  HISTORICAL: ["FORT", "ARCHAEOLOGICAL_SITE", "MUSEUM", "CITY_LANDMARK"],
++  CULTURE: ["MUSEUM", "ARCHAEOLOGICAL_SITE", "SHRINE", "MOSQUE", "BAZAAR"],
++  CULTURAL: ["MUSEUM", "ARCHAEOLOGICAL_SITE", "SHRINE", "MOSQUE", "BAZAAR"],
++  RELIGIOUS: ["MOSQUE", "SHRINE"],
++  RELIGION: ["MOSQUE", "SHRINE"],
++  FOOD: ["RESTAURANT"],
++  EAT: ["RESTAURANT"],
++  EATING: ["RESTAURANT"],
++  DINING: ["RESTAURANT"],
++  SHOPPING: ["BAZAAR"],
++  SHOP: ["BAZAAR"],
++  SHOPS: ["BAZAAR"],
++  MARKET: ["BAZAAR"],
++  MARKETS: ["BAZAAR"],
++  SCENIC: ["VIEWPOINT", "VALLEY", "LAKE", "HILL_STATION"],
++  VIEWS: ["VIEWPOINT"],
++  RELAX: ["LAKE", "HILL_STATION", "VALLEY"],
++  RELAXING: ["LAKE", "HILL_STATION", "VALLEY"],
++  CHILL: ["LAKE", "HILL_STATION", "VALLEY"],
++  WATER: ["LAKE", "WATERFALL", "GLACIER"],
++  INDOOR: ["MUSEUM", "BAZAAR", "RESTAURANT"],
++  INDOORS: ["MUSEUM", "BAZAAR", "RESTAURANT"],
++};
++
++function categoriesForFreeText(text: string): string[] | undefined {
++  const words = text.split(/[^A-Z]+/).filter(Boolean);
++  for (const word of words) {
++    const match = CATEGORY_KEYWORDS[word];
++    if (match) return match;
++  }
++  return undefined;
++}
++
+ function sseMessage(data: unknown): string {
+   return `data: ${JSON.stringify(data)}\n\n`;
+ }
+@@ -42,6 +87,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
+   const auth = await requireAuth();
+   if (!auth.ok) return auth.response;
+ 
++  // Global check above guards against unauthenticated/pre-auth flooding; this one is the
++  // actual per-account throttle — without it, a single user can exhaust the shared global
++  // budget and lock out every other user (see src/server/rate-limit.ts).
++  const perUserAllowed = await enforceRateLimit(`ai:chat:user:${auth.payload.sub}`, 20, 60);
++  if (!perUserAllowed) {
++    return jsonError("You're sending edits too quickly. Please wait a moment and try again.", 429);
++  }
++
+   const { id } = await params;
+   const access = await requireTripAccess(id, auth.payload.sub, "EDITOR");
+   if (!access.ok) return access.response;
+@@ -61,10 +114,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
+   const context = [
+     `Trip: ${trip.title}`,
+     ...trip.days.map(
+-      (day) =>
++      (day: (typeof trip.days)[number]) =>
+         `Day ${day.dayNumber} [tripDayId=${day.id}]: ${day.activities
+           .map(
+-            (a) =>
++            (a: (typeof day.activities)[number]) =>
+               `${a.poi?.name || a.customTitle || a.id} [activityId=${a.id}]`
+           )
+           .join(" | ")}`
+@@ -193,7 +246,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
+       include: { activities: { select: { id: true } } },
+     });
+     const orderedIds = tool.args.orderedActivityIds as string[];
+-    const dayActivityIds = new Set(day?.activities.map((a) => a.id) ?? []);
++    const dayActivityIds = new Set(day?.activities.map((a: NonNullable<typeof day>["activities"][number]) => a.id) ?? []);
+     // Scope check: every submitted id must belong to this day (and this day to this trip),
+     // and the set must match exactly — no dropping or injecting ids from elsewhere.
+     const validReorder =
+@@ -220,10 +273,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
+     if (activity && activity.tripDay.tripId === trip.id) {
+       const rawCriteria =
+         typeof tool.args.replacementCriteria === "string" ? tool.args.replacementCriteria.trim().toUpperCase() : "";
+-      // Only pass replacementCriteria through as a category filter if it's literally one of
+-      // the POICategory enum values. Free text like "outdoors" (design.md's own example)
+-      // won't match anything here — there's no semantic mapping layer for that yet.
+-      const categoryMix = POI_CATEGORIES.includes(rawCriteria) ? [rawCriteria] : undefined;
++      // Prefer an exact POICategory match; fall back to the keyword map above for common
++      // free-text phrasing the model passes through unnormalized (design.md's own example:
++      // "something outdoors").
++      const categoryMix = POI_CATEGORIES.includes(rawCriteria)
++        ? [rawCriteria]
++        : categoriesForFreeText(rawCriteria);
+ 
+       const candidates = await getCandidatePois({
+         regionId: activity.tripDay.regionId ?? undefined,
+diff --git a/src/app/api/v1/trips/[id]/days/[dayId]/reorder/route.ts b/src/app/api/v1/trips/[id]/days/[dayId]/reorder/route.ts
+index ad92078..c23ab99 100644
+--- a/src/app/api/v1/trips/[id]/days/[dayId]/reorder/route.ts
++++ b/src/app/api/v1/trips/[id]/days/[dayId]/reorder/route.ts
+@@ -20,7 +20,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id:
+   if (!day || day.tripId !== access.trip.id) return jsonError("Trip day not found", 404);
+ 
+   const idSet = new Set(parsed.data.orderedActivityIds);
+-  const dayActivityIds = new Set(day.activities.map((activity) => activity.id));
++  const dayActivityIds = new Set(day.activities.map((activity: (typeof day.activities)[number]) => activity.id));
+   if (
+     parsed.data.orderedActivityIds.length !== day.activities.length ||
+     idSet.size !== day.activities.length ||
+diff --git a/src/app/api/v1/trips/[id]/generate/route.ts b/src/app/api/v1/trips/[id]/generate/route.ts
+index 05eb9eb..67709cc 100644
+--- a/src/app/api/v1/trips/[id]/generate/route.ts
++++ b/src/app/api/v1/trips/[id]/generate/route.ts
+@@ -1,3 +1,4 @@
++import { Prisma } from "@prisma/client";
+ import { prisma } from "@/server/db";
+ import { jsonError } from "@/server/http";
+ import { parseJson } from "@/server/route-utils";
+@@ -21,6 +22,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
+   const auth = await requireAuth();
+   if (!auth.ok) return auth.response;
+ 
++  // Global check above guards against unauthenticated/pre-auth flooding; this one is the
++  // actual per-account throttle — without it, a single user can exhaust the shared global
++  // budget and lock out every other user (see src/server/rate-limit.ts).
++  const perUserAllowed = await enforceRateLimit(`ai:generate:user:${auth.payload.sub}`, 5, 60);
++  if (!perUserAllowed) {
++    return jsonError("You're generating itineraries too quickly. Please wait a moment and try again.", 429);
++  }
++
+   const { id } = await params;
+   const access = await requireTripAccess(id, auth.payload.sub, "EDITOR");
+   if (!access.ok) return access.response;
+@@ -150,7 +159,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
+ 
+   const candidateSet = new Set(candidates.map((poi) => poi.id));
+ 
+-  await prisma.$transaction(async (tx) => {
++  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+     await tx.activity.deleteMany({ where: { tripDay: { tripId: trip.id } } });
+     await tx.tripDay.deleteMany({ where: { tripId: trip.id } });
+ 
+diff --git a/src/server/candidates.ts b/src/server/candidates.ts
+index 569a3f2..19a0d5b 100644
+--- a/src/server/candidates.ts
++++ b/src/server/candidates.ts
+@@ -1,17 +1,31 @@
++import { Prisma } from "@prisma/client";
+ import { prisma } from "./db";
+ import { seasonsForRange } from "./season";
+ 
+ const EXCLUDED_PROVINCES = ["Balochistan", "Former FATA", "FATA", "Ex-FATA"];
+ 
++// Candidates handed to the model for a single request. For single-region requests this is
++// a straight SQL LIMIT, same as before. For multi-region/no-region requests it's a
++// post-sampling cap — see the region-spread comment below.
++const CANDIDATE_TARGET = 80;
++// Safety ceiling on the raw fetch when no regionId narrows the query, so a larger future
++// catalog (design.md targets 150-300 POIs; the seed data has 78 today) can't be pulled into
++// memory wholesale before sampling.
++const CANDIDATE_FETCH_CEILING = 600;
++// Soft per-region share of CANDIDATE_TARGET when spreading across every region.
++const MAX_PER_REGION = 20;
++
++export type CandidatePoi = Prisma.POIGetPayload<{ include: { region: true } }>;
++
+ export async function getCandidatePois(params: {
+   regionId?: string;
+   startDate: Date;
+   endDate: Date;
+   categoryMix?: string[];
+   excludePermitRequired?: boolean;
+-}) {
++}): Promise<CandidatePoi[]> {
+   const seasons = seasonsForRange(params.startDate, params.endDate);
+-  const where: any = {
++  const where: Prisma.POIWhereInput = {
+     region: {
+       province: {
+         notIn: EXCLUDED_PROVINCES,
+@@ -26,16 +40,61 @@ export async function getCandidatePois(params: {
+     where.regionId = params.regionId;
+   }
+   if (params.categoryMix?.length) {
+-    where.category = { in: params.categoryMix };
++    // Narrow cast at the boundary where a pre-validated string is handed to the Prisma enum
++    // filter — deliberately scoped to this one field rather than typing the whole `where`
++    // clause as `any` (which previously suppressed findMany's normal return-type inference
++    // and was a likely contributor to the implicit-`any` cascade in callers of this function).
++    where.category = { in: params.categoryMix as Prisma.POICategory[] };
+   }
+   if (params.excludePermitRequired) {
+     where.requiresPermit = false;
+   }
+ 
+-  return prisma.pOI.findMany({
++  const orderBy: Prisma.POIOrderByWithRelationInput[] = [{ requiresPermit: "asc" }, { verifiedAt: "desc" }];
++
++  // Single-region requests — today, the only kind the trip-creation UI actually sends —
++  // behave exactly as before: one query, ordered, capped at CANDIDATE_TARGET.
++  if (params.regionId) {
++    return prisma.pOI.findMany({
++      where,
++      include: { region: true },
++      orderBy,
++      take: CANDIDATE_TARGET,
++    });
++  }
++
++  // No regionId: fetch a wider pool, then cap per-region so the final candidate set spans
++  // regions instead of being dominated by whichever ones happen to sort first. Without this,
++  // a flat `take: N` ordered by verifiedAt could silently starve entire regions out of the
++  // candidate pool — the multi-region "Road Trip Crew" persona in design.md (e.g. Lahore ->
++  // Hunza) would hit this directly once trip creation supports more than one region per trip.
++  const pool = await prisma.pOI.findMany({
+     where,
+     include: { region: true },
+-    orderBy: [{ requiresPermit: "asc" }, { verifiedAt: "desc" }],
+-    take: 80,
++    orderBy,
++    take: CANDIDATE_FETCH_CEILING,
+   });
+-}
+\ No newline at end of file
++
++  const byRegion = new Map<string, CandidatePoi[]>();
++  for (const poi of pool) {
++    const bucket = byRegion.get(poi.regionId);
++    if (bucket) bucket.push(poi);
++    else byRegion.set(poi.regionId, [poi]);
++  }
++
++  const sampled: CandidatePoi[] = [];
++  for (let round = 0; sampled.length < CANDIDATE_TARGET && round < MAX_PER_REGION; round++) {
++    let addedThisRound = false;
++    for (const bucket of byRegion.values()) {
++      if (sampled.length >= CANDIDATE_TARGET) break;
++      const poi = bucket[round];
++      if (poi) {
++        sampled.push(poi);
++        addedThisRound = true;
++      }
++    }
++    if (!addedThisRound) break;
++  }
++
++  return sampled;
++}
+diff --git a/src/server/env.ts b/src/server/env.ts
+index 8ecd4ee..784eddb 100644
+--- a/src/server/env.ts
++++ b/src/server/env.ts
+@@ -8,19 +8,27 @@ import { z } from "zod";
+ const dev = process.env.NODE_ENV !== "production";
+ loadEnvConfig(process.cwd(), dev);
+ 
+-const envSchema = z.object({
+-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+-  PORT: z.coerce.number().default(3000),
+-  DATABASE_URL: z.string().min(1),
+-  REDIS_URL: z.string().default("redis://localhost:6379"),
+-  JWT_ACCESS_SECRET: z.string().min(16),
+-  JWT_REFRESH_SECRET: z.string().min(16),
+-  CLIENT_URL: z.string().default("http://localhost:3000"),
+-  GOOGLE_CLIENT_ID: z.string().min(1),
+-  GROQ_API_KEY: z.string().min(1),
+-  GROQ_API_BASE_URL: z.string().default("https://api.groq.com/openai/v1"),
+-  GROQ_MODEL_GENERATION: z.string().default("llama-3.3-70b-versatile"),
+-  GROQ_MODEL_CHAT: z.string().default("llama-3.1-8b-instant"),
+-});
++const envSchema = z
++  .object({
++    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
++    PORT: z.coerce.number().default(3000),
++    DATABASE_URL: z.string().min(1),
++    REDIS_URL: z.string().default("redis://localhost:6379"),
++    JWT_ACCESS_SECRET: z.string().min(16),
++    JWT_REFRESH_SECRET: z.string().min(16),
++    CLIENT_URL: z.string().default("http://localhost:3000"),
++    GOOGLE_CLIENT_ID: z.string().min(1),
++    GROQ_API_KEY: z.string().min(1),
++    GROQ_API_BASE_URL: z.string().default("https://api.groq.com/openai/v1"),
++    GROQ_MODEL_GENERATION: z.string().default("llama-3.3-70b-versatile"),
++    GROQ_MODEL_CHAT: z.string().default("llama-3.1-8b-instant"),
++  })
++  // .env.example documents that the two secrets must differ; that was never actually
++  // enforced. If they match, a leaked/guessed access token secret also compromises
++  // refresh tokens, collapsing the short-lived/long-lived separation the auth design relies on.
++  .refine((val) => val.JWT_ACCESS_SECRET !== val.JWT_REFRESH_SECRET, {
++    message: "JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be different values",
++    path: ["JWT_REFRESH_SECRET"],
++  });
+ 
+ export const env = envSchema.parse(process.env);
+\ No newline at end of file
+diff --git a/src/server/rate-limit.ts b/src/server/rate-limit.ts
+index 2cbca0a..cdd6817 100644
+--- a/src/server/rate-limit.ts
++++ b/src/server/rate-limit.ts
+@@ -1,10 +1,44 @@
+-import { redis } from "./cache";
++import Redis from "ioredis";
++import { env } from "./env";
+ 
++// Dedicated fail-fast connection, deliberately separate from the shared cache.ts `redis`
++// client (which is configured with maxRetriesPerRequest: null / enableReadyCheck: false so
++// BullMQ's worker can retry patiently through Redis blips without dropping in-flight jobs).
++// enforceRateLimit() sits directly in the request path of every AI call, so it needs the
++// opposite behaviour: same production guidance src/server/queue.ts already applies to its
++// producer-side `queueConnection` — fail fast rather than hang the HTTP response.
++const rateLimitRedis = new Redis(env.REDIS_URL, {
++  maxRetriesPerRequest: 1,
++  enableReadyCheck: false,
++  connectTimeout: 1500,
++  commandTimeout: 1000,
++  lazyConnect: false,
++});
++
++// Silence unhandled 'error' event crashes (ioredis emits these on top of rejecting the
++// in-flight command promise); enforceRateLimit's own try/catch is what actually handles it.
++rateLimitRedis.on("error", (err) => {
++  console.error("[rate-limit] redis connection error:", err.message);
++});
++
++/**
++ * Sliding-window-ish fixed-bucket rate limit backed by Redis INCR/EXPIRE.
++ *
++ * Fails OPEN (returns true / allows the request) if Redis itself is unreachable or too slow,
++ * rather than hanging the request indefinitely or hard-blocking every AI call during a cache
++ * outage. Rate limiting here is a cost/abuse control, not the primary security boundary
++ * (auth + trip-access checks still run regardless), so availability wins this tradeoff.
++ */
+ export async function enforceRateLimit(key: string, limit: number, windowSeconds: number): Promise<boolean> {
+   const nowBucket = `${key}:${Math.floor(Date.now() / 1000 / windowSeconds)}`;
+-  const count = await redis.incr(nowBucket);
+-  if (count === 1) {
+-    await redis.expire(nowBucket, windowSeconds + 1);
++  try {
++    const count = await rateLimitRedis.incr(nowBucket);
++    if (count === 1) {
++      await rateLimitRedis.expire(nowBucket, windowSeconds + 1);
++    }
++    return count <= limit;
++  } catch (err) {
++    console.error("[rate-limit] check failed, failing open:", key, err instanceof Error ? err.message : err);
++    return true;
+   }
+-  return count <= limit;
+ }
+diff --git a/src/server/serialize.ts b/src/server/serialize.ts
+index 11fc21a..14afc5d 100644
+--- a/src/server/serialize.ts
++++ b/src/server/serialize.ts
+@@ -49,6 +49,8 @@ function toPoi(poi: any): POI {
+     requiresPermit: poi.requiresPermit,
+     permitAuthority: poi.permitAuthority,
+     permitNotes: poi.permitNotes,
++    permitOfficialLink: poi.permitOfficialLink ?? null,
++    permitLastVerifiedAt: poi.permitLastVerifiedAt?.toISOString() ?? null,
+     roadCondition: poi.roadCondition,
+     avgVisitHours: poi.avgVisitHours,
+     entryFeePkr: poi.entryFeePkr,
+diff --git a/src/server/trip-service.ts b/src/server/trip-service.ts
+index c828817..09c42eb 100644
+--- a/src/server/trip-service.ts
++++ b/src/server/trip-service.ts
+@@ -37,7 +37,7 @@ export type TripAccessResult =
+ 
+ function roleOf(trip: TripWithInclude, userId: string): TripRole | null {
+   if (trip.ownerId === userId) return "OWNER";
+-  const membership = trip.collaborators.find((c) => c.userId === userId);
++  const membership = trip.collaborators.find((c: TripWithInclude["collaborators"][number]) => c.userId === userId);
+   return (membership?.role as TripRole | undefined) ?? null;
+ }
+ 
+diff --git a/src/server/validators.ts b/src/server/validators.ts
+index a44c8c5..d0c3b72 100644
+--- a/src/server/validators.ts
++++ b/src/server/validators.ts
+@@ -80,10 +80,15 @@ export const registerSchema = z.object({
+   homeCountry: z.string().optional(),
+ });
+ 
++// Both fields below are interpolated directly into the Groq prompt (see src/lib/ai/planner.ts).
++// Bounded so a single request can't inflate token cost unboundedly or pad in a large
++// injection payload — paired with the per-user AI rate limit in rate-limit.ts.
++const AI_TEXT_MAX = 2000;
++
+ export const generateSchema = z.object({
+   regionSlug: z.string().optional(),
+-  prompt: z.string().optional(),
+-  destination: z.string().optional(),
++  prompt: z.string().max(AI_TEXT_MAX).optional(),
++  destination: z.string().max(200).optional(),
+   startDate: z.string().datetime().optional(),
+   endDate: z.string().datetime().optional(),
+   travelerType: z.enum(travelerTypes).optional(),
+@@ -92,7 +97,7 @@ export const generateSchema = z.object({
+ });
+ 
+ export const chatSchema = z.object({
+-  content: z.string().min(1),
++  content: z.string().min(1).max(AI_TEXT_MAX),
+ });
+ 
+ export const inviteSchema = z.object({

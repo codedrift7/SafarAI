@@ -77,6 +77,8 @@ async function main() {
         requiresPermit: poi.requiresPermit,
         permitAuthority: poi.permitAuthority ?? null,
         permitNotes: poi.permitNotes ?? null,
+        permitOfficialLink: poi.permitOfficialLink ?? null,
+        permitLastVerifiedAt: poi.permitLastVerifiedAt ? new Date(poi.permitLastVerifiedAt) : null,
         roadCondition: poi.roadCondition,
         avgVisitHours: poi.avgVisitHours ?? null,
         entryFeePkr: poi.entryFeePkr ?? null,

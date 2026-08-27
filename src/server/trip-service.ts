@@ -37,7 +37,7 @@ export type TripAccessResult =
 
 function roleOf(trip: TripWithInclude, userId: string): TripRole | null {
   if (trip.ownerId === userId) return "OWNER";
-  const membership = trip.collaborators.find((c) => c.userId === userId);
+  const membership = trip.collaborators.find((c: TripWithInclude["collaborators"][number]) => c.userId === userId);
   return (membership?.role as TripRole | undefined) ?? null;
 }
 

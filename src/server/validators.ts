@@ -80,10 +80,15 @@ export const registerSchema = z.object({
   homeCountry: z.string().optional(),
 });
 
+// Both fields below are interpolated directly into the Groq prompt (see src/lib/ai/planner.ts).
+// Bounded so a single request can't inflate token cost unboundedly or pad in a large
+// injection payload — paired with the per-user AI rate limit in rate-limit.ts.
+const AI_TEXT_MAX = 2000;
+
 export const generateSchema = z.object({
   regionSlug: z.string().optional(),
-  prompt: z.string().optional(),
-  destination: z.string().optional(),
+  prompt: z.string().max(AI_TEXT_MAX).optional(),
+  destination: z.string().max(200).optional(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
   travelerType: z.enum(travelerTypes).optional(),
@@ -92,7 +97,7 @@ export const generateSchema = z.object({
 });
 
 export const chatSchema = z.object({
-  content: z.string().min(1),
+  content: z.string().min(1).max(AI_TEXT_MAX),
 });
 
 export const inviteSchema = z.object({

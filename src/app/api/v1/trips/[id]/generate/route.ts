@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/server/db";
 import { jsonError } from "@/server/http";
 import { parseJson } from "@/server/route-utils";
@@ -20,6 +21,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const auth = await requireAuth();
   if (!auth.ok) return auth.response;
+
+  // Global check above guards against unauthenticated/pre-auth flooding; this one is the
+  // actual per-account throttle — without it, a single user can exhaust the shared global
+  // budget and lock out every other user (see src/server/rate-limit.ts).
+  const perUserAllowed = await enforceRateLimit(`ai:generate:user:${auth.payload.sub}`, 5, 60);
+  if (!perUserAllowed) {
+    return jsonError("You're generating itineraries too quickly. Please wait a moment and try again.", 429);
+  }
 
   const { id } = await params;
   const access = await requireTripAccess(id, auth.payload.sub, "EDITOR");
@@ -150,7 +159,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const candidateSet = new Set(candidates.map((poi) => poi.id));
 
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.activity.deleteMany({ where: { tripDay: { tripId: trip.id } } });
     await tx.tripDay.deleteMany({ where: { tripId: trip.id } });
 

@@ -31,6 +31,51 @@ const POI_CATEGORIES = [
   "VIEWPOINT",
 ];
 
+// Fallback for swap_activity's replacementCriteria when the model passes through free text
+// instead of an exact POICategory value (design.md's own example: "something outdoors").
+// Not full NLP — a small explicit keyword map for the phrasing users are most likely to use.
+// Broad words map to several categories rather than one arbitrary pick; anything unmatched
+// falls through to `undefined` (no category filter), same as the previous behavior.
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  OUTDOOR: ["MOUNTAIN", "LAKE", "WATERFALL", "NATIONAL_PARK", "VALLEY", "GLACIER", "VIEWPOINT", "HILL_STATION"],
+  OUTDOORS: ["MOUNTAIN", "LAKE", "WATERFALL", "NATIONAL_PARK", "VALLEY", "GLACIER", "VIEWPOINT", "HILL_STATION"],
+  NATURE: ["MOUNTAIN", "LAKE", "WATERFALL", "NATIONAL_PARK", "VALLEY", "GLACIER", "VIEWPOINT"],
+  ADVENTURE: ["MOUNTAIN", "WATERFALL", "NATIONAL_PARK", "GLACIER"],
+  ADVENTUROUS: ["MOUNTAIN", "WATERFALL", "NATIONAL_PARK", "GLACIER"],
+  HISTORY: ["FORT", "ARCHAEOLOGICAL_SITE", "MUSEUM", "CITY_LANDMARK"],
+  HISTORICAL: ["FORT", "ARCHAEOLOGICAL_SITE", "MUSEUM", "CITY_LANDMARK"],
+  CULTURE: ["MUSEUM", "ARCHAEOLOGICAL_SITE", "SHRINE", "MOSQUE", "BAZAAR"],
+  CULTURAL: ["MUSEUM", "ARCHAEOLOGICAL_SITE", "SHRINE", "MOSQUE", "BAZAAR"],
+  RELIGIOUS: ["MOSQUE", "SHRINE"],
+  RELIGION: ["MOSQUE", "SHRINE"],
+  FOOD: ["RESTAURANT"],
+  EAT: ["RESTAURANT"],
+  EATING: ["RESTAURANT"],
+  DINING: ["RESTAURANT"],
+  SHOPPING: ["BAZAAR"],
+  SHOP: ["BAZAAR"],
+  SHOPS: ["BAZAAR"],
+  MARKET: ["BAZAAR"],
+  MARKETS: ["BAZAAR"],
+  SCENIC: ["VIEWPOINT", "VALLEY", "LAKE", "HILL_STATION"],
+  VIEWS: ["VIEWPOINT"],
+  RELAX: ["LAKE", "HILL_STATION", "VALLEY"],
+  RELAXING: ["LAKE", "HILL_STATION", "VALLEY"],
+  CHILL: ["LAKE", "HILL_STATION", "VALLEY"],
+  WATER: ["LAKE", "WATERFALL", "GLACIER"],
+  INDOOR: ["MUSEUM", "BAZAAR", "RESTAURANT"],
+  INDOORS: ["MUSEUM", "BAZAAR", "RESTAURANT"],
+};
+
+function categoriesForFreeText(text: string): string[] | undefined {
+  const words = text.split(/[^A-Z]+/).filter(Boolean);
+  for (const word of words) {
+    const match = CATEGORY_KEYWORDS[word];
+    if (match) return match;
+  }
+  return undefined;
+}
+
 function sseMessage(data: unknown): string {
   return `data: ${JSON.stringify(data)}\n\n`;
 }
@@ -41,6 +86,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const auth = await requireAuth();
   if (!auth.ok) return auth.response;
+
+  // Global check above guards against unauthenticated/pre-auth flooding; this one is the
+  // actual per-account throttle — without it, a single user can exhaust the shared global
+  // budget and lock out every other user (see src/server/rate-limit.ts).
+  const perUserAllowed = await enforceRateLimit(`ai:chat:user:${auth.payload.sub}`, 20, 60);
+  if (!perUserAllowed) {
+    return jsonError("You're sending edits too quickly. Please wait a moment and try again.", 429);
+  }
 
   const { id } = await params;
   const access = await requireTripAccess(id, auth.payload.sub, "EDITOR");
@@ -61,10 +114,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const context = [
     `Trip: ${trip.title}`,
     ...trip.days.map(
-      (day) =>
+      (day: (typeof trip.days)[number]) =>
         `Day ${day.dayNumber} [tripDayId=${day.id}]: ${day.activities
           .map(
-            (a) =>
+            (a: (typeof day.activities)[number]) =>
               `${a.poi?.name || a.customTitle || a.id} [activityId=${a.id}]`
           )
           .join(" | ")}`
@@ -193,7 +246,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       include: { activities: { select: { id: true } } },
     });
     const orderedIds = tool.args.orderedActivityIds as string[];
-    const dayActivityIds = new Set(day?.activities.map((a) => a.id) ?? []);
+    const dayActivityIds = new Set(day?.activities.map((a: NonNullable<typeof day>["activities"][number]) => a.id) ?? []);
     // Scope check: every submitted id must belong to this day (and this day to this trip),
     // and the set must match exactly — no dropping or injecting ids from elsewhere.
     const validReorder =
@@ -220,10 +273,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (activity && activity.tripDay.tripId === trip.id) {
       const rawCriteria =
         typeof tool.args.replacementCriteria === "string" ? tool.args.replacementCriteria.trim().toUpperCase() : "";
-      // Only pass replacementCriteria through as a category filter if it's literally one of
-      // the POICategory enum values. Free text like "outdoors" (design.md's own example)
-      // won't match anything here — there's no semantic mapping layer for that yet.
-      const categoryMix = POI_CATEGORIES.includes(rawCriteria) ? [rawCriteria] : undefined;
+      // Prefer an exact POICategory match; fall back to the keyword map above for common
+      // free-text phrasing the model passes through unnormalized (design.md's own example:
+      // "something outdoors").
+      const categoryMix = POI_CATEGORIES.includes(rawCriteria)
+        ? [rawCriteria]
+        : categoriesForFreeText(rawCriteria);
 
       const candidates = await getCandidatePois({
         regionId: activity.tripDay.regionId ?? undefined,

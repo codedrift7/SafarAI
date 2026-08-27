@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   if (!access.ok) return access.response;
 
   const orderIndex = parsed.data.afterActivityId
-    ? Math.max(0, day.activities.find((activity) => activity.id === parsed.data.afterActivityId)?.orderIndex ?? day.activities.length - 1) + 1
+    ? Math.max(0, day.activities.find((activity: (typeof day.activities)[number]) => activity.id === parsed.data.afterActivityId)?.orderIndex ?? day.activities.length - 1) + 1
     : day.activities.length;
 
   if (parsed.data.afterActivityId) {

@@ -20,7 +20,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   if (!day || day.tripId !== access.trip.id) return jsonError("Trip day not found", 404);
 
   const idSet = new Set(parsed.data.orderedActivityIds);
-  const dayActivityIds = new Set(day.activities.map((activity) => activity.id));
+  const dayActivityIds = new Set(day.activities.map((activity: (typeof day.activities)[number]) => activity.id));
   if (
     parsed.data.orderedActivityIds.length !== day.activities.length ||
     idSet.size !== day.activities.length ||

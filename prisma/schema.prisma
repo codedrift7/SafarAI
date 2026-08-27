@@ -217,6 +217,13 @@ model POI {
   requiresPermit  Boolean       @default(false)
   permitAuthority String?
   permitNotes     String?
+  // Sourced-and-timestamped permit data required by design.md section 6.4. These existed on
+  // the pre-database mock POI data (src/lib/mock-data/pois.ts) and are already read by the
+  // advisory generator (src/lib/domain/advisories.ts) — the columns just never made it into
+  // the schema, so every real (seeded) POI silently had neither. Backfilled via migration
+  // 20260827120000_add_poi_permit_link_and_verified_at.
+  permitOfficialLink   String?
+  permitLastVerifiedAt DateTime?
   roadCondition   RoadCondition @default(PAVED)
   avgVisitHours   Float?
   entryFeePkr     Float?

@@ -49,6 +49,8 @@ function toPoi(poi: any): POI {
     requiresPermit: poi.requiresPermit,
     permitAuthority: poi.permitAuthority,
     permitNotes: poi.permitNotes,
+    permitOfficialLink: poi.permitOfficialLink ?? null,
+    permitLastVerifiedAt: poi.permitLastVerifiedAt?.toISOString() ?? null,
     roadCondition: poi.roadCondition,
     avgVisitHours: poi.avgVisitHours,
     entryFeePkr: poi.entryFeePkr,
