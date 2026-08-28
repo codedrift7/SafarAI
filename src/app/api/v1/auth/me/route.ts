@@ -14,6 +14,7 @@ export async function GET() {
     authProvider: user.authProvider,
     homeCountry: user.homeCountry,
     avatarUrl: user.avatarUrl,
+    emailVerified: user.emailVerified?.toISOString() ?? null,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
   });

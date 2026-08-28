@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Menu, Mountain, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { UserMenu } from "@/components/layout/user-menu";
 
 const navigation = [
   { href: "/destinations", label: "Destinations" },
@@ -23,6 +24,7 @@ export function SiteHeader() {
         <nav className="hidden items-center gap-7 md:flex" aria-label="Primary navigation">
           {navigation.map((item) => <Link key={item.href} href={item.href} className="text-sm font-medium text-sandstone-mist/80 transition hover:text-truck-art-marigold">{item.label}</Link>)}
           <Button asChild size="sm"><Link href="/trips/new"><Plus size={16} strokeWidth={2} /> Plan a trip</Link></Button>
+          <UserMenu />
         </nav>
         <button type="button" className="grid size-10 place-items-center rounded-full text-sandstone-mist md:hidden" onClick={() => setOpen((value) => !value)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open}>
           {open ? <X /> : <Menu />}
@@ -32,6 +34,9 @@ export function SiteHeader() {
         <div className="mx-auto flex max-w-7xl flex-col gap-1">
           {navigation.map((item) => <Link onClick={() => setOpen(false)} key={item.href} href={item.href} className="rounded-lg px-3 py-3 text-sandstone-mist hover:bg-white/10">{item.label}</Link>)}
           <Button asChild className="mt-2"><Link onClick={() => setOpen(false)} href="/trips/new"><Plus size={16} /> Plan a trip</Link></Button>
+          <div className="mt-2 border-t border-white/10 pt-2">
+            <UserMenu mobile onNavigate={() => setOpen(false)} />
+          </div>
         </div>
       </nav>}
     </header>

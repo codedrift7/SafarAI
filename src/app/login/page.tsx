@@ -1,13 +1,14 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Loader2, Mountain } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
-
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -39,7 +40,7 @@ export default function LoginPage() {
         throw new Error(body?.error || `Login failed: ${response.status}`);
       }
 
-      router.push("/trips");
+      router.push(redirect || "/trips");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to log in.");
@@ -88,12 +89,20 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="mb-2 block text-sm font-medium text-karakoram-ink"
-              >
-                Password
-              </label>
+              <div className="mb-2 flex items-center justify-between">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-karakoram-ink"
+                >
+                  Password
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs font-semibold text-attabad-turquoise hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
 
               <input
                 id="password"
@@ -144,5 +153,13 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -3,6 +3,8 @@ import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { AuthProvider } from "@/components/auth-provider";
+import { EmailVerificationBanner } from "@/components/email-verification-banner";
 
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", display: "swap" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -18,9 +20,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${fraunces.variable} ${inter.variable} ${mono.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <SiteHeader />
-        <main>{children}</main>
-        <SiteFooter />
+        <AuthProvider>
+          <SiteHeader />
+          <EmailVerificationBanner />
+          <main>{children}</main>
+          <SiteFooter />
+        </AuthProvider>
       </body>
     </html>
   );
