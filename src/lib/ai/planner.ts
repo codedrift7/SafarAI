@@ -103,60 +103,60 @@ function rescueTruncatedJson(failedGeneration: string): Record<string, unknown> 
   }
 }
 
-// B1: Serialize the full POI object so the model has real context to write
-// specific, useful activity notes — not just a name and category.
+// Cap free-text fields so a handful of long descriptions/safety notes can't blow the
+// per-POI token budget. Model gets enough to write a grounded note, not the full record.
+const MAX_DESC_CHARS = 140;
+const MAX_SAFETY_CHARS = 90;
+const MAX_PERMIT_NOTE_CHARS = 60;
+
+function truncate(text: string, max: number): string {
+  if (text.length <= max) return text;
+  return `${text.slice(0, max - 1).trimEnd()}…`;
+}
+
+// B1: Serialize just enough of each POI for the model to write a grounded, specific
+// activity note — one compact line per POI instead of a multi-line block. Region
+// description/typicalTripDays and per-POI "Verified" stamps were dropped: they added
+// ~2 lines/POI across up to CANDIDATE_TARGET (80) POIs without changing what the model
+// needs to decide (region name + province is enough; unverified-handling is covered
+// once in the system prompt, not restated per candidate).
 function candidateSummary(candidatePois: POI[]): string {
   return candidatePois
     .map((poi) => {
-      const lines: string[] = [];
-
-      lines.push(
-        `[${poi.id}] ${poi.name} (${poi.category}) — ${poi.region?.name ?? poi.regionId}, ${poi.region?.province ?? ""}`.trimEnd(),
-      );
+      const parts: string[] = [
+        `[${poi.id}] ${poi.name} (${poi.category}) — ${poi.region?.name ?? poi.regionId}${poi.region?.province ? `, ${poi.region.province}` : ""}`,
+      ];
 
       if (poi.description) {
-        lines.push(`  Description: ${poi.description}`);
+        parts.push(truncate(poi.description, MAX_DESC_CHARS));
       }
 
       const meta = [
-        `Seasons: ${poi.bestSeasons.join(", ")}`,
-        poi.avgVisitHours != null ? `Visit: ~${poi.avgVisitHours}h` : "",
-        poi.altitudeMeters != null ? `Altitude: ${poi.altitudeMeters}m` : "",
+        `Seasons: ${poi.bestSeasons.join(",")}`,
+        poi.avgVisitHours != null ? `~${poi.avgVisitHours}h` : "",
+        poi.altitudeMeters != null ? `${poi.altitudeMeters}m alt` : "",
         poi.roadCondition ? `Road: ${poi.roadCondition}` : "",
+        poi.entryFeePkr != null ? `${poi.entryFeePkr} PKR` : "Free",
+        !poi.verifiedAt ? "UNVERIFIED" : "",
       ]
         .filter(Boolean)
         .join(" | ");
-      if (meta) lines.push(`  ${meta}`);
-
-      const fee = poi.entryFeePkr != null ? `Entry fee: ${poi.entryFeePkr} PKR` : "Entry: free";
-      lines.push(`  ${fee}`);
+      if (meta) parts.push(meta);
 
       if (poi.safetyNotes) {
-        lines.push(`  Safety: ${poi.safetyNotes}`);
+        parts.push(`Safety: ${truncate(poi.safetyNotes, MAX_SAFETY_CHARS)}`);
       }
 
       if (poi.requiresPermit) {
-        const permitParts = ["Permit required"];
-        if (poi.permitAuthority) permitParts.push(`authority: ${poi.permitAuthority}`);
-        if (poi.permitNotes) permitParts.push(`notes: ${poi.permitNotes}`);
-        lines.push(`  ${permitParts.join(" — ")}`);
+        const permitParts = ["PERMIT REQUIRED"];
+        if (poi.permitAuthority) permitParts.push(poi.permitAuthority);
+        if (poi.permitNotes) permitParts.push(truncate(poi.permitNotes, MAX_PERMIT_NOTE_CHARS));
+        parts.push(permitParts.join(" — "));
       }
 
-      const verified = poi.verifiedAt
-        ? `Verified: ${poi.verifiedAt}`
-        : "Verified: unverified (use customTitle, set poiId to null)";
-      lines.push(`  ${verified}`);
-
-      if (poi.region?.description) {
-        lines.push(`  Region context: ${poi.region.description}`);
-      }
-      if (poi.region?.typicalTripDays != null) {
-        lines.push(`  Typical trip: ${poi.region.typicalTripDays} days`);
-      }
-
-      return lines.join("\n");
+      return parts.join(" | ");
     })
-    .join("\n\n");
+    .join("\n");
 }
 
 function systemPrompt(input: PlannerInput): string {
