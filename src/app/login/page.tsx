@@ -4,11 +4,13 @@ import { FormEvent, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Loader2, Mountain } from "lucide-react";
+import { useAuth } from "@/components/auth-provider";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
+  const auth = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -40,6 +42,7 @@ function LoginForm() {
         throw new Error(body?.error || `Login failed: ${response.status}`);
       }
 
+      await auth.refresh();
       router.push(redirect || "/trips");
       router.refresh();
     } catch (err) {

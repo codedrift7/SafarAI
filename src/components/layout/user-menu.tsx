@@ -32,7 +32,16 @@ export function UserMenu({ mobile, onNavigate }: UserMenuProps) {
   async function handleLogout() {
     try {
       await fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" });
-      auth.refresh();
+      // Clear any per-user banner dismiss keys
+      try {
+        for (let i = sessionStorage.length - 1; i >= 0; i--) {
+          const key = sessionStorage.key(i);
+          if (key?.startsWith("safar_verify_banner_dismissed:")) {
+            sessionStorage.removeItem(key);
+          }
+        }
+      } catch { /* sessionStorage may be unavailable */ }
+      await auth.refresh();
       if (onNavigate) onNavigate();
       router.push("/");
       router.refresh();
@@ -41,55 +50,9 @@ export function UserMenu({ mobile, onNavigate }: UserMenuProps) {
     }
   }
 
-  if (auth.loading) {
-    if (mobile) {
-      return (
-        <div className="flex gap-2 animate-pulse px-3 py-3">
-          <div className="h-5 w-20 bg-sandstone-mist/20 rounded-md"></div>
-        </div>
-      );
-    }
-    return <div className="size-9 rounded-full bg-sandstone-mist/20 animate-pulse" />;
-  }
-
-  if (!auth.user) {
-    if (mobile) {
-      return (
-        <>
-          <Link
-            href="/login"
-            onClick={onNavigate}
-            className="rounded-lg px-3 py-3 text-sandstone-mist hover:bg-white/10"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/register"
-            onClick={onNavigate}
-            className="rounded-lg px-3 py-3 text-sandstone-mist hover:bg-white/10"
-          >
-            Sign up
-          </Link>
-        </>
-      );
-    }
-
-    return (
-      <div className="flex items-center gap-4">
-        <Link
-          href="/login"
-          className="text-sm font-medium text-sandstone-mist/80 transition hover:text-truck-art-marigold"
-        >
-          Log in
-        </Link>
-        <Link
-          href="/register"
-          className="text-sm font-medium text-sandstone-mist/80 transition hover:text-truck-art-marigold"
-        >
-          Sign up
-        </Link>
-      </div>
-    );
+  // While loading or when not logged in, render nothing in the navbar
+  if (auth.loading || !auth.user) {
+    return null;
   }
 
   const userInitials = auth.user.name ? auth.user.name.charAt(0).toUpperCase() : "U";

@@ -6,9 +6,16 @@ import { useAuth } from "@/components/auth-provider";
 
 export function EmailVerificationBanner() {
   const auth = useAuth();
+
+  // Build a per-user dismiss key so dismissing as user A doesn't hide
+  // the banner when user B logs in on the same tab
+  const dismissKey = auth.user
+    ? `safar_verify_banner_dismissed:${auth.user.id}`
+    : null;
+
   const [dismissed, setDismissed] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return sessionStorage.getItem("safar_verify_banner_dismissed") === "1";
+    if (typeof window === "undefined" || !dismissKey) return false;
+    return sessionStorage.getItem(dismissKey) === "1";
   });
   const [resendState, setResendState] = useState<
     "idle" | "sending" | "sent" | "error"
@@ -21,7 +28,9 @@ export function EmailVerificationBanner() {
 
   function handleDismiss() {
     setDismissed(true);
-    sessionStorage.setItem("safar_verify_banner_dismissed", "1");
+    if (dismissKey) {
+      sessionStorage.setItem(dismissKey, "1");
+    }
   }
 
   async function handleResend() {

@@ -4,9 +4,11 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Loader2, Mountain } from "lucide-react";
+import { useAuth } from "@/components/auth-provider";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const auth = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -44,6 +46,7 @@ export default function RegisterPage() {
         );
       }
 
+      await auth.refresh();
       router.push("/trips");
       router.refresh();
     } catch (err) {
