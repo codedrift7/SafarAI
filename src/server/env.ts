@@ -20,8 +20,8 @@ const envSchema = z
     GOOGLE_CLIENT_ID: z.string().min(1),
     GROQ_API_KEY: z.string().min(1),
     GROQ_API_BASE_URL: z.string().default("https://api.groq.com/openai/v1"),
-    GROQ_MODEL_GENERATION: z.string().default("llama-3.3-70b-versatile"),
-    GROQ_MODEL_CHAT: z.string().default("llama-3.1-8b-instant"),
+    GROQ_MODEL_GENERATION: z.string().default("openai/gpt-oss-120b"),
+    GROQ_MODEL_CHAT: z.string().default("openai/gpt-oss-20b"),
   })
   // .env.example documents that the two secrets must differ; that was never actually
   // enforced. If they match, a leaked/guessed access token secret also compromises
