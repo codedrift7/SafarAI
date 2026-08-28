@@ -81,20 +81,52 @@ enum ActivityCategory {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String?
-  authProvider String   @default("email")
-  name         String
-  homeCountry  String?
-  avatarUrl    String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String?
+  authProvider  String    @default("email")
+  name          String
+  homeCountry   String?
+  avatarUrl     String?
+  // Null = unverified. Set once the emailVerificationToken flow completes. Unverified
+  // users can still log in and use the app (per product decision) — the frontend shows
+  // a "please verify" banner rather than requireAuth() gating on this field.
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  trips          Trip[]
-  collaborations TripCollaborator[]
-  savedPlaces    SavedPlace[]
-  votes          ActivityVote[]
+  trips                   Trip[]
+  collaborations          TripCollaborator[]
+  savedPlaces             SavedPlace[]
+  votes                   ActivityVote[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
+}
+
+// Only the hash is stored — same principle as passwordHash. The raw token only ever
+// exists in the emailed link and briefly in memory server-side while verifying it.
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 model Trip {

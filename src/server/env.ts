@@ -22,6 +22,9 @@ const envSchema = z
     GROQ_API_BASE_URL: z.string().default("https://api.groq.com/openai/v1"),
     GROQ_MODEL_GENERATION: z.string().default("openai/gpt-oss-120b"),
     GROQ_MODEL_CHAT: z.string().default("openai/gpt-oss-20b"),
+    RESEND_API_KEY: z.string(),
+    EMAIL_FROM: z.string().email(),
+    APP_URL: z.string().url(),
   })
   // .env.example documents that the two secrets must differ; that was never actually
   // enforced. If they match, a leaked/guessed access token secret also compromises
