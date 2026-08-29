@@ -64,6 +64,16 @@ export function UserMenu({ mobile, onNavigate }: UserMenuProps) {
           <div className="text-sm font-semibold text-sandstone-mist">{auth.user.name}</div>
           <div className="text-xs text-sandstone-mist/60">{auth.user.email}</div>
         </div>
+        {!auth.user.emailVerified && (
+          <Link
+            href="/verify-email"
+            onClick={onNavigate}
+            className="rounded-lg flex items-center gap-2 px-3 py-3 text-amber-400 hover:bg-white/10"
+          >
+            <ShieldAlert size={16} />
+            Verify email
+          </Link>
+        )}
         <Link
           href="/trips"
           onClick={onNavigate}

@@ -1,25 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Mail, X, Loader2, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 
 export function EmailVerificationBanner() {
   const auth = useAuth();
+  const userId = auth.user?.id ?? "anonymous";
+  const storageKey = `safar_verify_banner_dismissed:${userId}`;
 
-  // Build a per-user dismiss key so dismissing as user A doesn't hide
-  // the banner when user B logs in on the same tab
-  const dismissKey = auth.user
-    ? `safar_verify_banner_dismissed:${auth.user.id}`
-    : null;
-
+  // Reset state whenever the logged-in user changes
   const [dismissed, setDismissed] = useState(() => {
-    if (typeof window === "undefined" || !dismissKey) return false;
-    return sessionStorage.getItem(dismissKey) === "1";
+    if (typeof window === "undefined") return false;
+    return sessionStorage.getItem(storageKey) === "1";
   });
   const [resendState, setResendState] = useState<
     "idle" | "sending" | "sent" | "error"
   >("idle");
+
+  // When auth.user changes, clear previous state so a new account sees a fresh banner
+  useEffect(() => {
+    // Reset dismissed flag for new user (or anonymous)
+    setDismissed(sessionStorage.getItem(storageKey) === "1");
+    // Reset resend button state
+    setResendState("idle");
+  }, [userId, storageKey]);
+
+  // When auth.user changes, clear previous state so a new account sees a fresh banner
+  useEffect(() => {
+    // Reset resend button and dismissed flag when the user changes (login/logout)
+    setResendState("idle");
+    setDismissed(false);
+  }, [auth.user?.id]);
 
   // Don't render while loading, if not logged in, if already verified, or if dismissed
   if (auth.loading || !auth.user || auth.user.emailVerified || dismissed) {
@@ -28,9 +40,7 @@ export function EmailVerificationBanner() {
 
   function handleDismiss() {
     setDismissed(true);
-    if (dismissKey) {
-      sessionStorage.setItem(dismissKey, "1");
-    }
+    sessionStorage.setItem(storageKey, "1");
   }
 
   async function handleResend() {
