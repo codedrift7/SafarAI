@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { Mail, X, Loader2, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 
@@ -18,20 +18,18 @@ export function EmailVerificationBanner() {
     "idle" | "sending" | "sent" | "error"
   >("idle");
 
-  // When auth.user changes, clear previous state so a new account sees a fresh banner
-  useEffect(() => {
-    // Reset dismissed flag for new user (or anonymous)
-    setDismissed(sessionStorage.getItem(storageKey) === "1");
-    // Reset resend button state
+  // React-recommended pattern: adjust state during render when a prop changes
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const prevUserIdRef = useRef(userId);
+  if (prevUserIdRef.current !== userId) {
+    prevUserIdRef.current = userId;
+    setDismissed(
+      typeof window !== "undefined"
+        ? sessionStorage.getItem(storageKey) === "1"
+        : false
+    );
     setResendState("idle");
-  }, [userId, storageKey]);
-
-  // When auth.user changes, clear previous state so a new account sees a fresh banner
-  useEffect(() => {
-    // Reset resend button and dismissed flag when the user changes (login/logout)
-    setResendState("idle");
-    setDismissed(false);
-  }, [auth.user?.id]);
+  }
 
   // Don't render while loading, if not logged in, if already verified, or if dismissed
   if (auth.loading || !auth.user || auth.user.emailVerified || dismissed) {

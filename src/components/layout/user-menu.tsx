@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, Map } from "lucide-react";
+import { LogOut, Map, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 
 interface UserMenuProps {
