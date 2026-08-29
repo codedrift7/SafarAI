@@ -157,8 +157,42 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     console.error("[gap-filler] failed, falling back to ungapped days", err);
   }
 
+  // Layer 3: OSRM routing — inject real TRANSPORT legs between consecutive POIs.
+  // Wrapped in try/catch — failure degrades to gap-filled days, never fails the request.
+  // routingLegKeys identifies injected TRANSPORT activities in the Activity.create loop below.
+  let routingLegKeys = new Set<string>();
+  let routingStats = { legsInserted: 0, daysRescheduled: 0, timeConflicts: [] as any[], skipped: 0 };
+  try {
+    const { injectTransportLegs } = await import("@/lib/ai/routing");
+    const routingResult = await injectTransportLegs(
+      finalDays,
+      candidates.map((poi) => ({
+        id: poi.id,
+        name: poi.name,
+        latitude: poi.latitude,
+        longitude: poi.longitude,
+      })),
+    );
+    finalDays = routingResult.days;
+    routingLegKeys = routingResult.routingLegKeys;
+    routingStats = routingResult.routingStats;
+    if (routingStats.legsInserted > 0 || routingStats.timeConflicts.length > 0) {
+      console.log("[routing] transport legs injected", { tripId: trip.id, ...routingStats });
+    }
+    if (routingStats.timeConflicts.length > 0) {
+      console.warn("[routing] time conflicts detected", { tripId: trip.id, conflicts: routingStats.timeConflicts });
+    }
+  } catch (err) {
+    console.error("[routing] failed, falling back to gap-filled days", err);
+  }
+
   const candidateSet = new Set(candidates.map((poi) => poi.id));
 
+  // timeout: Prisma's default interactive-transaction timeout is 5 s.  With 20+ Activity
+  // rows to write and each DB round-trip to Neon (ap-southeast-1) taking ~100–200 ms,
+  // a typical 4-day trip easily exceeds that.  30 s gives plenty of room.
+  // createMany per day: replaces N sequential awaited creates (one RTT each) with a
+  // single batch insert per day — cuts DB round-trips from ~N to ~(days + 2 deletes + 1 update).
   await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.activity.deleteMany({ where: { tripDay: { tripId: trip.id } } });
     await tx.tripDay.deleteMany({ where: { tripId: trip.id } });
@@ -174,46 +208,68 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         },
       });
 
-      for (const [index, activity] of day.activities.entries()) {
-        // REST fillers have no poiId — skip candidate-set check for them.
-        // All other activities must be in the candidate set or get nulled out.
+      // Build all activity rows for this day in memory, then insert in one batch.
+      const activityRows = day.activities.map((activity, index) => {
+        // REST and TRANSPORT(routing) both have no poiId — skip candidate-set
+        // check for them so they don't fall into the "Unverified AI suggestion" path.
         const isRest = activity.category === "REST";
-        const validPoiId = isRest
+        // A routing-injected TRANSPORT is identified by its dayNumber:startTime key,
+        // set in routingLegKeys by injectTransportLegs() in Layer 3.
+        const isRoutingLeg =
+          activity.category === "TRANSPORT" &&
+          routingLegKeys.has(`${day.dayNumber}:${activity.startTime}`);
+
+        const validPoiId = isRest || isRoutingLeg
           ? null
           : activity.poiId && candidateSet.has(activity.poiId)
             ? activity.poiId
             : null;
 
-        // Determine source: if the activity has a poiId that isn't in the model's
-        // original output, it was inserted by the gap filler.
-        const isAutoFill = !modelResult.days.some((d) =>
-          d.activities.some((a) => a.poiId === activity.poiId && a.startTime === activity.startTime),
-        );
+        // Source resolution (in priority order):
+        // 1. routing  — TRANSPORT leg injected by OSRM routing layer
+        // 2. auto_fill — activity inserted by gap-filler (not in model's original output)
+        // 3. model     — everything else
+        const isAutoFill =
+          !isRoutingLeg &&
+          !modelResult.days.some((d) =>
+            d.activities.some(
+              (a) => a.poiId === activity.poiId && a.startTime === activity.startTime,
+            ),
+          );
 
-        await tx.activity.create({
-          data: {
-            tripDayId: tripDay.id,
-            poiId: validPoiId,
-            customTitle: isRest
-              ? (activity.customTitle || "Rest break")
+        const activitySource = isRoutingLeg
+          ? "routing"
+          : isAutoFill
+            ? "auto_fill"
+            : "model";
+
+        return {
+          tripDayId: tripDay.id,
+          poiId: validPoiId,
+          customTitle: isRest
+            ? (activity.customTitle || "Rest break")
+            : isRoutingLeg
+              // customTitle set by routing.ts: "Drive to {nextPoiName}"
+              ? (activity.customTitle || "Drive")
               : validPoiId
                 ? null
                 : activity.customTitle || "AI suggestion, unverified",
-            category: activity.category as any,
-            startTime: activity.startTime,
-            endTime: activity.endTime,
-            orderIndex: index,
-            notes: validPoiId || isRest
-              ? activity.note
-              : `${activity.note || ""} Unverified AI suggestion.`.trim(),
-            source: isAutoFill ? "auto_fill" : "model",
-          },
-        });
-      }
+          category: activity.category as any,
+          startTime: activity.startTime,
+          endTime: activity.endTime,
+          orderIndex: index,
+          notes: validPoiId || isRest || isRoutingLeg
+            ? activity.note
+            : `${activity.note || ""} Unverified AI suggestion.`.trim(),
+          source: activitySource as any,
+        };
+      });
+
+      await tx.activity.createMany({ data: activityRows });
     }
 
     await tx.trip.update({ where: { id: trip.id }, data: { status: "CONFIRMED" } });
-  });
+  }, { timeout: 30000, maxWait: 10000 });
 
   const hydratedTrip = await prisma.trip.findUnique({ where: { id: trip.id }, include: tripInclude });
   const dto = toTrip(hydratedTrip!);
@@ -238,7 +294,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           ),
         );
       });
-      controller.enqueue(new TextEncoder().encode(sseMessage({ type: "complete", tripId: trip.id, trip: dto, progress: 100 })));
+      // routingStats included so the frontend can show a warning badge when
+      // timeConflicts.length > 0 (drive takes longer than the available day allows).
+      controller.enqueue(new TextEncoder().encode(sseMessage({ type: "complete", tripId: trip.id, trip: dto, progress: 100, routingStats })));
       controller.close();
     },
   });

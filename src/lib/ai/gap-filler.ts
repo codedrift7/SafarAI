@@ -140,6 +140,14 @@ function findNearbyFiller(
   usedPoiIds: Set<string>,
   pace: string,
 ): FillerResult {
+  // If gap endpoints are > 10 km apart, this gap is almost certainly a drive.
+  // Leave it for the routing layer (Layer 3 — routing.ts) to handle with a real
+  // TRANSPORT activity. Inserting a POI stop here would place it mid-highway.
+  const endpointDistanceKm = haversineKm(gap.anchorLat, gap.anchorLng, gap.nextLat, gap.nextLng);
+  if (endpointDistanceKm > 10) {
+    return { type: "none" };
+  }
+
   // Midpoint between previous and next activity (avoids backtracking)
   const midLat = (gap.anchorLat + gap.nextLat) / 2;
   const midLng = (gap.anchorLng + gap.nextLng) / 2;

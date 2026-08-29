@@ -8,6 +8,7 @@
     "start": "cross-env NODE_ENV=production node dist-server/server/index.js",
     "build:server": "tsc -p src/server/tsconfig.server.json && tsc-alias -p src/server/tsconfig.server.json",
     "lint": "eslint .",
+    "test": "tsx --test src/lib/ai/__tests__/*.test.ts",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",

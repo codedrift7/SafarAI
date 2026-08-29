@@ -25,6 +25,11 @@ const envSchema = z
     RESEND_API_KEY: z.string(),
     EMAIL_FROM: z.string().email(),
     APP_URL: z.string().url(),
+    // OSRM routing (Layer 3 of itinerary generation).
+    // Default = public demo server. Development/testing only — self-host before real user traffic.
+    // Pre-launch checklist: https://github.com/Project-OSRM/osrm-backend#quick-start
+    OSRM_BASE_URL: z.string().url().default("https://router.project-osrm.org"),
+    OSRM_TIMEOUT_MS: z.coerce.number().default(5000),
   })
   // .env.example documents that the two secrets must differ; that was never actually
   // enforced. If they match, a leaked/guessed access token secret also compromises

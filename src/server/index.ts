@@ -17,15 +17,25 @@ async function bootstrap() {
   await app.prepare();
 
   const server = express();
-  server.use(helmet());
+  server.use(helmet({ contentSecurityPolicy: false })); // we set our own CSP below
   server.use(cors({ origin: env.CLIENT_URL, credentials: true }));
 
   server.use((req, res, nextMiddleware) => {
   const nonce = crypto.randomBytes(16).toString("base64");
 
+  // Next's dev-mode React Refresh (hot reload) evaluates code via eval(), which the
+  // production script-src (nonce + strict-dynamic, no unsafe-eval) correctly blocks.
+  // That's the right policy for production but breaks the entire client bundle in dev
+  // — nothing crashes loudly, the page just renders with no working JS. Dev gets a
+  // looser script-src so the app actually runs locally; only the production policy
+  // is the one that matters for real users.
+  const scriptSrc = dev
+    ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`;
+
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    scriptSrc,
     "script-src-attr 'none'",
     "style-src 'self' https: 'unsafe-inline'",
     "img-src 'self' data: blob: https: http:",

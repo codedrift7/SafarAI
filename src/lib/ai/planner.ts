@@ -246,6 +246,19 @@ export async function generateItineraryWithRetry(input: PlannerInput): Promise<G
     .filter(Boolean)
     .join("\n");
 
+  // Dynamic max_tokens: Groq bills (input_tokens + max_tokens) against a hard per-model
+  // ceiling (8 000 for openai/gpt-oss-120b).  Estimate input size at ~1 token per 4 chars,
+  // then compute how much headroom remains — capped at 6 500 so we never request a
+  // completion budget larger than the model can actually fill.
+  //
+  // Example results:
+  //   Hunza (8 POIs,  ~1 200 input tokens) → max_tokens = 6 500  (total ≈ 7 700 ✅)
+  //   All 78 POIs     (~5 800 input tokens) → max_tokens = 2 000  (total ≈ 7 800 ✅)
+  const sysLen = systemPrompt(input).length;
+  const estimatedInputTokens = Math.round((sysLen + userContent.length + 1462 /* tool JSON */) / 4);
+  const dynamicMaxTokens = Math.min(6500, Math.max(1000, 7800 - estimatedInputTokens));
+  console.log("[planner] token budget", { estimatedInputTokens, dynamicMaxTokens });
+
   let first;
   try {
     first = await groqClient.chat.completions.create({
@@ -257,7 +270,7 @@ export async function generateItineraryWithRetry(input: PlannerInput): Promise<G
       tools: toolDefinitions as any,
       tool_choice: { type: "function", function: { name: "generate_itinerary" } },
       temperature: 0.2,
-      max_tokens: 16384,
+      max_tokens: dynamicMaxTokens,
     });
   } catch (err: any) {
     console.error("[planner] First API call failed:", {
@@ -328,7 +341,7 @@ export async function generateItineraryWithRetry(input: PlannerInput): Promise<G
       tools: toolDefinitions as any,
       tool_choice: { type: "function", function: { name: "generate_itinerary" } },
       temperature: 0.1,
-      max_tokens: 16384,
+      max_tokens: dynamicMaxTokens, // same budget as first call
     });
   } catch (err: any) {
     // Same rescue logic for retry

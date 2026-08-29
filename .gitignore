@@ -5,3 +5,6 @@ dist-server
 !.env.example
 *.tsbuildinfo
 .vercel
+osrm-pakistan/
+*.osrm*
+*.osm.pbf

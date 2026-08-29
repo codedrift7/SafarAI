@@ -206,6 +206,7 @@ model Activity {
 enum ActivitySource {
   model
   auto_fill
+  routing    // TRANSPORT activities inserted by the OSRM routing layer (routing.ts)
 }
 
 model ActivityVote {
