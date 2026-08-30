@@ -25,9 +25,10 @@ const envSchema = z
     RESEND_API_KEY: z.string(),
     EMAIL_FROM: z.string().email(),
     APP_URL: z.string().url(),
-    // OSRM routing (Layer 3 of itinerary generation).
-    // Default = public demo server. Development/testing only — self-host before real user traffic.
-    // Pre-launch checklist: https://github.com/Project-OSRM/osrm-backend#quick-start
+    // Routing (Layer 3 of itinerary generation).
+    // Primary: Mapbox Directions API (100k free requests/month).
+    // Fallback: OSRM public demo server or self-hosted instance (used when no Mapbox token).
+    MAPBOX_ACCESS_TOKEN: z.string().optional(),
     OSRM_BASE_URL: z.string().url().default("https://router.project-osrm.org"),
     OSRM_TIMEOUT_MS: z.coerce.number().default(5000),
   })

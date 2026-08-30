@@ -135,6 +135,7 @@ function candidateSummary(candidatePois: POI[]): string {
         `Seasons: ${poi.bestSeasons.join(",")}`,
         poi.avgVisitHours != null ? `~${poi.avgVisitHours}h` : "",
         poi.altitudeMeters != null ? `${poi.altitudeMeters}m alt` : "",
+        `lat: ${poi.latitude.toFixed(4)}, lng: ${poi.longitude.toFixed(4)}`,
         poi.roadCondition ? `Road: ${poi.roadCondition}` : "",
         poi.entryFeePkr != null ? `${poi.entryFeePkr} PKR` : "Free",
         !poi.verifiedAt ? "UNVERIFIED" : "",
@@ -163,11 +164,15 @@ function systemPrompt(input: PlannerInput): string {
   const parts = [
     "You are SafarAI itinerary planner for trips in Pakistan.",
     "Only choose POIs from the candidate list by id.",
+    "Never reuse the same poiId — each POI should appear at most once across the entire trip. Multiple different POIs on the same day is fine and encouraged when they are nearby.",
+    "Group nearby POIs together on the same day. Sequence the days and stops in a logical geographic progression (e.g., moving South to North along a valley) using the provided lat/lng coordinates to eliminate backtracking.",
     "Never include Balochistan or former FATA regions.",
     "If suggesting a non-verified stop, set poiId to null and provide customTitle.",
     "If POI requiresPermit=true, mention it in the note.",
     // B3: Reinforce note requirement
     "Every activity MUST have a note field: 1–2 sentences on what the place is and why it is worth stopping. Include a practical tip (fee, permit, road condition, duration) when the data is in the candidate list. Never leave note blank.",
+    // Layer 3: TRANSPORT is handled automatically — don't let the model generate drive legs
+    "NEVER create activities with category TRANSPORT — driving legs between stops are calculated automatically from real road data after you finish. Just schedule the POI stops back-to-back; travel time will be inserted for you.",
     // Layer 1: Gap prevention — threshold matches gap-filler.ts getPaceThreshold()
     `Avoid gaps longer than ${input.pace === "packed" ? 60 : input.pace === "relaxed" ? 120 : 90} minutes between activities. If there is idle time between two stops, insert a nearby candidate POI as a filler — prefer walkable stops and choose ONLY from the candidate list by id (never invent a POI). Check avgVisitHours to estimate duration. For packed pace, fill ALL gaps. For relaxed pace, gaps up to 2 hours are acceptable only if you insert a REST activity (category REST, poiId omitted) to cover them.`,
   ];

@@ -63,35 +63,35 @@ const POI_NEAR = { id: "poi-c", name: "Nearby Spot", latitude: 36.3270, longitud
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("getOsrmDuration", () => {
+describe("getRouteDuration", () => {
   it("returns drive duration on successful OSRM response", async () => {
     global.fetch = makeFetchMock({ routes: [{ duration: 5400, distance: 48200 }] }) as any;
 
     // Dynamic import AFTER env is set and fetch is mocked.
-    const { getOsrmDuration } = await import("../routing.js");
-    const result = await getOsrmDuration(36.3269, 74.8605, 36.4754, 74.9991);
+    const { getRouteDuration } = await import("../routing.js");
+    const result = await getRouteDuration(36.3269, 74.8605, 36.4754, 74.9991);
 
     assert.equal(result, 5400);
   });
 
   it("returns null when OSRM returns non-200 status", async () => {
     global.fetch = makeFetchMock({}, 503) as any;
-    const { getOsrmDuration } = await import("../routing.js");
-    const result = await getOsrmDuration(36.0, 74.0, 37.0, 75.0);
+    const { getRouteDuration } = await import("../routing.js");
+    const result = await getRouteDuration(36.0, 74.0, 37.0, 75.0);
     assert.equal(result, null);
   });
 
   it("returns null when OSRM returns malformed JSON (missing routes)", async () => {
     global.fetch = makeFetchMock({ error: "No route found" }) as any;
-    const { getOsrmDuration } = await import("../routing.js");
-    const result = await getOsrmDuration(36.1, 74.1, 37.1, 75.1);
+    const { getRouteDuration } = await import("../routing.js");
+    const result = await getRouteDuration(36.1, 74.1, 37.1, 75.1);
     assert.equal(result, null);
   });
 
   it("returns null on network error (fetch throws)", async () => {
     global.fetch = mock.fn(async () => { throw new Error("Network error"); }) as any;
-    const { getOsrmDuration } = await import("../routing.js");
-    const result = await getOsrmDuration(36.2, 74.2, 37.2, 75.2);
+    const { getRouteDuration } = await import("../routing.js");
+    const result = await getRouteDuration(36.2, 74.2, 37.2, 75.2);
     assert.equal(result, null);
   });
 });

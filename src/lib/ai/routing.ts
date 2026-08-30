@@ -1,16 +1,20 @@
 /**
- * Layer 3: OSRM-powered TRANSPORT leg injection.
+ * Layer 3: Mapbox-powered TRANSPORT leg injection.
  *
  * Called after generateItineraryWithRetry() (Layer 1) and fillGaps() (Layer 2).
  * Inserts real TRANSPORT activities between consecutive POI stops using actual
- * OSRM drive durations, and shifts subsequent activities when the drive overruns
- * the scheduled gap — capped at 21:00 to avoid silently producing unusable
- * late-night schedules.
+ * Mapbox Directions drive durations, and shifts subsequent activities when the
+ * drive overruns the scheduled gap — capped at 21:00 to avoid silently producing
+ * unusable late-night schedules.
  *
  * Key design decisions:
- * - Uses OSRM Route API (/route/v1/driving) for pairwise lookups.
- *   overview=false + steps=false: duration + distance only, no road names.
- * - Concurrent OSRM fetches within each day; days processed sequentially so
+ * - Uses the Mapbox Directions API (/directions/v5/mapbox/driving) for pairwise
+ *   lookups. overview=false + steps=false: duration + distance only, no geometry,
+ *   no turn-by-turn steps. Mapbox's response shape for these two fields
+ *   (routes[].duration in seconds, routes[].distance in meters) matches OSRM's,
+ *   so this swap only touches the request/env layer below — the day-processing
+ *   logic is unchanged from the OSRM version.
+ * - Concurrent Mapbox fetches within each day; days processed sequentially so
  *   time-shift cascades from one day do not bleed into the next.
  * - When drive > gap AND cascade would exceed 21:00: times are left overlapping
  *   and the conflict is recorded in routingStats.timeConflicts. This is the
@@ -19,11 +23,6 @@
  * - In-memory cache deduplicates identical legs within a single generation.
  *   Process-scoped: no cross-request benefit on serverless cold starts.
  * - Never throws — returns original days + zeroed stats on any internal failure.
- *
- * OSRM_BASE_URL defaults to router.project-osrm.org (public demo server).
- * This is for development/testing only. Self-host before real user traffic.
- * Pre-launch checklist item: deploy osrm-backend with pakistan-latest.osm.pbf.
- * See: https://github.com/Project-OSRM/osrm-backend#quick-start
  */
 
 import type { GeneratedItineraryArgs } from "./schemas";
@@ -50,7 +49,7 @@ export interface RoutingStats {
     to: string;
     driveMinutes: number;
   }>;
-  /** Pairs where OSRM returned null (network error, timeout, malformed response). */
+  /** Pairs where Mapbox returned null (network error, timeout, rate limit, malformed response). */
   skipped: number;
 }
 
@@ -71,7 +70,7 @@ export interface InjectTransportResult {
 
 type ActivityShape = GeneratedItineraryArgs["days"][0]["activities"][0];
 
-interface OsrmResult {
+interface RouteResult {
   durationSeconds: number;
   distanceMeters: number;
 }
@@ -118,12 +117,12 @@ function formatDistance(meters: number): string {
 }
 
 // ---------------------------------------------------------------------------
-// OSRM client
+// Route provider (Mapbox primary, OSRM fallback)
 // ---------------------------------------------------------------------------
 
-const osrmCache = new Map<string, OsrmResult | null>();
+const routeCache = new Map<string, RouteResult | null>();
 
-function osrmCacheKey(
+function routeCacheKey(
   fromLat: number,
   fromLng: number,
   toLat: number,
@@ -133,25 +132,59 @@ function osrmCacheKey(
 }
 
 /**
- * Fetch point-to-point drive duration + distance from OSRM Route API.
- * Returns null on network error, timeout, non-200, or malformed JSON. Never throws.
+ * Build the routing URL for the configured provider.
+ *
+ * Mapbox Directions API (when MAPBOX_ACCESS_TOKEN is set):
+ *   https://api.mapbox.com/directions/v5/mapbox/driving/{lon1},{lat1};{lon2},{lat2}
+ *     ?overview=false&steps=false&access_token={token}
+ *
+ * OSRM (fallback — public demo or self-hosted):
+ *   {OSRM_BASE_URL}/route/v1/driving/{lon1},{lat1};{lon2},{lat2}
+ *     ?overview=false&steps=false
+ *
+ * Both return routes[].duration (seconds) and routes[].distance (meters),
+ * so the response parsing below is provider-agnostic.
  */
-async function fetchOsrmRoute(
+function buildRouteUrl(
   fromLat: number,
   fromLng: number,
   toLat: number,
   toLng: number,
-): Promise<OsrmResult | null> {
-  const key = osrmCacheKey(fromLat, fromLng, toLat, toLng);
-  if (osrmCache.has(key)) return osrmCache.get(key)!;
+): { url: string; provider: "mapbox" | "osrm" } {
+  // Longitude before latitude — both APIs use GeoJSON coordinate order.
+  const coords =
+    `${fromLng.toFixed(6)},${fromLat.toFixed(6)};${toLng.toFixed(6)},${toLat.toFixed(6)}`;
+
+  if (env.MAPBOX_ACCESS_TOKEN) {
+    return {
+      url:
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${coords}` +
+        `?overview=false&steps=false&access_token=${env.MAPBOX_ACCESS_TOKEN}`,
+      provider: "mapbox",
+    };
+  }
+
+  return {
+    url: `${env.OSRM_BASE_URL}/route/v1/driving/${coords}?overview=false&steps=false`,
+    provider: "osrm",
+  };
+}
+
+/**
+ * Fetch point-to-point drive duration + distance.
+ * Returns null on network error, timeout, rate limit, or malformed response. Never throws.
+ */
+async function fetchRoute(
+  fromLat: number,
+  fromLng: number,
+  toLat: number,
+  toLng: number,
+): Promise<RouteResult | null> {
+  const key = routeCacheKey(fromLat, fromLng, toLat, toLng);
+  if (routeCache.has(key)) return routeCache.get(key)!;
 
   try {
-    // Longitude before latitude: OSRM uses GeoJSON coordinate order.
-    // overview=false, steps=false: no geometry, no road names, just summary.
-    const url =
-      `${env.OSRM_BASE_URL}/route/v1/driving/` +
-      `${fromLng.toFixed(6)},${fromLat.toFixed(6)};${toLng.toFixed(6)},${toLat.toFixed(6)}` +
-      `?overview=false&steps=false`;
+    const { url, provider } = buildRouteUrl(fromLat, fromLng, toLat, toLng);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), env.OSRM_TIMEOUT_MS);
@@ -164,29 +197,35 @@ async function fetchOsrmRoute(
     }
 
     if (!response.ok) {
-      osrmCache.set(key, null);
+      if (response.status === 429) {
+        console.warn(`[routing] ${provider} rate limit hit (HTTP 429) — skipping pair`);
+      } else {
+        console.warn(`[routing] ${provider} error HTTP ${response.status}`);
+      }
+      routeCache.set(key, null);
       return null;
     }
 
+    // Both Mapbox and OSRM return { routes: [{ duration: number, distance: number }] }
     const data = (await response.json()) as {
       routes?: Array<{ duration: number; distance: number }>;
     };
     const route = data?.routes?.[0];
 
     if (typeof route?.duration !== "number" || typeof route?.distance !== "number") {
-      osrmCache.set(key, null);
+      routeCache.set(key, null);
       return null;
     }
 
-    const result: OsrmResult = {
+    const result: RouteResult = {
       durationSeconds: route.duration,
       distanceMeters: route.distance,
     };
-    osrmCache.set(key, result);
+    routeCache.set(key, result);
     return result;
   } catch {
     // Covers AbortError (timeout), network errors, JSON parse errors.
-    osrmCache.set(key, null);
+    routeCache.set(key, null);
     return null;
   }
 }
@@ -195,13 +234,13 @@ async function fetchOsrmRoute(
  * Exported primarily for unit testing.
  * Returns drive duration in seconds, or null on any error.
  */
-export async function getOsrmDuration(
+export async function getRouteDuration(
   fromLat: number,
   fromLng: number,
   toLat: number,
   toLng: number,
 ): Promise<number | null> {
-  const result = await fetchOsrmRoute(fromLat, fromLng, toLat, toLng);
+  const result = await fetchRoute(fromLat, fromLng, toLat, toLng);
   return result?.durationSeconds ?? null;
 }
 
@@ -214,7 +253,7 @@ type DayInput = GeneratedItineraryArgs["days"][0];
 /**
  * Process one day:
  * 1. Identify consecutive pairs where both activities have a POI with coordinates.
- * 2. Fetch OSRM for all pairs concurrently (within this day).
+ * 2. Fetch Mapbox for all pairs concurrently (within this day).
  * 3. Walk pairs in order, inserting TRANSPORT activities and cascading time shifts.
  */
 async function processDayRouting(
@@ -239,11 +278,22 @@ async function processDayRouting(
   const pairs: Pair[] = [];
   for (let i = 0; i < activities.length - 1; i++) {
     const a = activities[i];
-    const b = activities[i + 1];
-    if (!a.poiId || !b.poiId) continue;
+    if (!a.poiId) continue;
     const aPoi = poiMap.get(a.poiId);
-    const bPoi = poiMap.get(b.poiId);
-    if (!aPoi || !bPoi) continue;
+    if (!aPoi) continue;
+
+    // Scan forward past non-POI activities (REST, model-generated TRANSPORT,
+    // unverified suggestions) to find the next activity with a real POI.
+    let bIdx = i + 1;
+    while (bIdx < activities.length && !activities[bIdx].poiId) {
+      bIdx++;
+    }
+    if (bIdx >= activities.length) continue;
+
+    const b = activities[bIdx];
+    const bPoi = poiMap.get(b.poiId!);
+    if (!bPoi) continue;
+
     pairs.push({
       aIdx: i,
       aPoiName: aPoi.name,
@@ -253,18 +303,21 @@ async function processDayRouting(
       toLat: bPoi.latitude,
       toLng: bPoi.longitude,
     });
+
+    // Skip ahead so we don't create overlapping pairs
+    i = bIdx - 1;
   }
 
   if (pairs.length === 0) return day;
 
-  // Concurrent OSRM fetches for this day's pairs.
-  const osrmResults = await Promise.all(
-    pairs.map((p) => fetchOsrmRoute(p.fromLat, p.fromLng, p.toLat, p.toLng)),
+  // Concurrent Mapbox fetches for this day's pairs.
+  const routeResults = await Promise.all(
+    pairs.map((p) => fetchRoute(p.fromLat, p.fromLng, p.toLat, p.toLng)),
   );
 
-  const pairByAIdx = new Map<number, { pair: Pair; osrm: OsrmResult | null }>();
+  const pairByAIdx = new Map<number, { pair: Pair; route: RouteResult | null }>();
   for (let i = 0; i < pairs.length; i++) {
-    pairByAIdx.set(pairs[i].aIdx, { pair: pairs[i], osrm: osrmResults[i] ?? null });
+    pairByAIdx.set(pairs[i].aIdx, { pair: pairs[i], route: routeResults[i] ?? null });
   }
 
   const newActivities: ActivityShape[] = [];
@@ -287,19 +340,19 @@ async function processDayRouting(
     const entry = pairByAIdx.get(i);
     if (!entry) continue;
 
-    const { pair, osrm } = entry;
+    const { pair, route } = entry;
 
-    if (!osrm) {
+    if (!route) {
       stats.skipped++;
       continue;
     }
 
-    if (osrm.durationSeconds < MIN_DRIVE_SECONDS) {
+    if (route.durationSeconds < MIN_DRIVE_SECONDS) {
       // Sub-15-min drive: not worth a TRANSPORT entry.
       continue;
     }
 
-    const driveMin = Math.ceil(osrm.durationSeconds / 60);
+    const driveMin = Math.ceil(route.durationSeconds / 60);
     const aEndMin = timeToMinutes(shifted.endTime);
 
     // B's start from original array, adjusted for cumulative shift.
@@ -316,7 +369,7 @@ async function processDayRouting(
       category: "TRANSPORT",
       startTime: transportStartStr,
       endTime: minutesToTime(transportStartMin + driveMin),
-      note: `${formatDuration(osrm.durationSeconds)} drive (${formatDistance(osrm.distanceMeters)})`,
+      note: `${formatDuration(route.durationSeconds)} drive (${formatDistance(route.distanceMeters)})`,
     };
 
     newActivities.push(transportActivity);
@@ -357,8 +410,8 @@ async function processDayRouting(
 
 /**
  * Layer 3 entry point. Injects TRANSPORT activities into all days using real
- * OSRM drive durations. Days processed sequentially; OSRM calls within each
- * day are concurrent.
+ * Mapbox drive durations. Days processed sequentially; Mapbox calls within
+ * each day are concurrent.
  *
  * Never throws. Matches the degradation contract of fillGaps() (Layer 2).
  */

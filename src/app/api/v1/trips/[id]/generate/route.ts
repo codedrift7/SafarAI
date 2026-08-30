@@ -210,25 +210,29 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
       // Build all activity rows for this day in memory, then insert in one batch.
       const activityRows = day.activities.map((activity, index) => {
-        // REST and TRANSPORT(routing) both have no poiId — skip candidate-set
+        // REST and TRANSPORT both legitimately have no poiId — skip candidate-set
         // check for them so they don't fall into the "Unverified AI suggestion" path.
+        // TRANSPORT can come from two sources:
+        //   - Model-generated: the LLM itself suggests a drive (e.g. "Drive from Gilgit to Attabad Lake")
+        //   - Routing-injected: Layer 3 OSRM/Mapbox adds "Drive to {nextPoi}" between consecutive POIs
         const isRest = activity.category === "REST";
+        const isTransport = activity.category === "TRANSPORT";
         // A routing-injected TRANSPORT is identified by its dayNumber:startTime key,
         // set in routingLegKeys by injectTransportLegs() in Layer 3.
         const isRoutingLeg =
-          activity.category === "TRANSPORT" &&
+          isTransport &&
           routingLegKeys.has(`${day.dayNumber}:${activity.startTime}`);
 
-        const validPoiId = isRest || isRoutingLeg
+        const validPoiId = isRest || isTransport
           ? null
           : activity.poiId && candidateSet.has(activity.poiId)
             ? activity.poiId
             : null;
 
         // Source resolution (in priority order):
-        // 1. routing  — TRANSPORT leg injected by OSRM routing layer
+        // 1. routing  — TRANSPORT leg injected by OSRM/Mapbox routing layer
         // 2. auto_fill — activity inserted by gap-filler (not in model's original output)
-        // 3. model     — everything else
+        // 3. model     — everything else (including model-generated TRANSPORT)
         const isAutoFill =
           !isRoutingLeg &&
           !modelResult.days.some((d) =>
@@ -248,8 +252,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           poiId: validPoiId,
           customTitle: isRest
             ? (activity.customTitle || "Rest break")
-            : isRoutingLeg
-              // customTitle set by routing.ts: "Drive to {nextPoiName}"
+            : isTransport
               ? (activity.customTitle || "Drive")
               : validPoiId
                 ? null
@@ -258,7 +261,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           startTime: activity.startTime,
           endTime: activity.endTime,
           orderIndex: index,
-          notes: validPoiId || isRest || isRoutingLeg
+          notes: validPoiId || isRest || isTransport
             ? activity.note
             : `${activity.note || ""} Unverified AI suggestion.`.trim(),
           source: activitySource as any,
