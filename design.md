@@ -714,7 +714,7 @@ NVIDIA_API_KEY=
 NVIDIA_API_BASE_URL=https://integrate.api.nvidia.com/v1
 
 # Maps / places / weather
-MAPBOX_TOKEN=
+MAPBOX_ACCESS_TOKEN=
 GOOGLE_PLACES_API_KEY=
 WEATHER_API_KEY=
 

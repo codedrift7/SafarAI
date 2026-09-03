@@ -1,3 +1,5 @@
+@import "mapbox-gl/dist/mapbox-gl.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -93,6 +95,44 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 .route-dash {
   stroke-dasharray: 8 8;
   stroke-linecap: round;
+}
+
+.safar-map .mapboxgl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid rgba(18, 35, 43, 0.12);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(18, 35, 43, 0.16);
+}
+
+.safar-map .mapboxgl-ctrl-group button {
+  width: 30px;
+  height: 30px;
+}
+
+.safar-map .mapboxgl-ctrl-attrib {
+  border-radius: 0.5rem 0 0 0;
+  background: rgba(255, 255, 255, 0.82);
+  color: rgba(18, 35, 43, 0.7);
+  font-family: var(--font-inter), Inter, Arial, sans-serif;
+}
+
+.safar-map .mapboxgl-ctrl-attrib a {
+  color: #155367;
+}
+
+.safar-map-marker {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 2px solid white;
+  border-radius: 9999px;
+  background: var(--ink);
+  color: white;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(18, 35, 43, 0.28);
 }
 
 @media (prefers-reduced-motion: reduce) {

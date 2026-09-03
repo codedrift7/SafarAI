@@ -40,7 +40,11 @@ async function bootstrap() {
     "style-src 'self' https: 'unsafe-inline'",
     "img-src 'self' data: blob: https: http:",
     "font-src 'self' https: data:",
-    "connect-src 'self'",
+    // Mapbox GL fetches its style, tiles, glyphs, and telemetry directly from
+    // Mapbox. Keep this narrow instead of broadly permitting arbitrary HTTPS.
+    "connect-src 'self' https://*.mapbox.com",
+    // Mapbox GL creates its rendering worker from a blob URL.
+    "worker-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
