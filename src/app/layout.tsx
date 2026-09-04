@@ -14,7 +14,13 @@ export const metadata: Metadata = {
   title: "Safar — Pakistan, planned with care",
   description: "A grounded AI trip planner for journeys across Pakistan.",
   referrer: "no-referrer",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
+
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
