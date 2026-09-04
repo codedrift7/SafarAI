@@ -1,5 +1,8 @@
 # SafarAI
 
+**Live demo:** https://safarai.me
+> Deployed as a standard Next.js app on Vercel. The custom Express server described below (CSP middleware, long-running process for AI streaming) is used for local dev and self-hosted/Docker deployments.
+
 **An AI trip planner built specifically for how travel actually works in Pakistan** — permits, passes that close for winter, patchy mountain signal, and all.
 
 Most AI trip planners are built for dense European transit, uniform visa rules, and English signage everywhere. SafarAI grounds itinerary generation in a curated, permit-aware, season-aware Pakistan travel database instead, so it can tell you that Khunjerab Pass shuts for winter or that a valley needs a 4x4 — not just string together plausible-sounding places.
