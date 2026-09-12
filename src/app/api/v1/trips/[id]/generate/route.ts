@@ -106,11 +106,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   } catch (err) {
     if (err instanceof ItineraryGenerationError) {
       return jsonError(
-        "We couldn't generate a reliable itinerary automatically. Please build this trip's days manually, or try generating again.",
+        err.message ||
+          "We couldn't generate a reliable itinerary automatically. Please build this trip's days manually, or try generating again.",
         422,
       );
     }
-    throw err;
+    console.error("[generate] unexpected error during itinerary generation:", err);
+    return jsonError(
+      err instanceof Error && err.message
+        ? `Generation failed: ${err.message}`
+        : "Failed to generate itinerary. Please try again or create days manually.",
+      500,
+    );
   }
 
   // Layer 2: Post-generation gap detection and auto-fill.
@@ -229,23 +236,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             ? activity.poiId
             : null;
 
-        // Source resolution (in priority order):
-        // 1. routing  — TRANSPORT leg injected by OSRM/Mapbox routing layer
-        // 2. auto_fill — activity inserted by gap-filler (not in model's original output)
-        // 3. model     — everything else (including model-generated TRANSPORT)
-        const isAutoFill =
-          !isRoutingLeg &&
-          !modelResult.days.some((d) =>
-            d.activities.some(
-              (a) => a.poiId === activity.poiId && a.startTime === activity.startTime,
-            ),
-          );
-
-        const activitySource = isRoutingLeg
-          ? "routing"
-          : isAutoFill
-            ? "auto_fill"
-            : "model";
+        const source: "catalog" | "ai_generated" = validPoiId ? "catalog" : "ai_generated";
 
         return {
           tripDayId: tripDay.id,
@@ -256,15 +247,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               ? (activity.customTitle || "Drive")
               : validPoiId
                 ? null
-                : activity.customTitle || "AI suggestion, unverified",
+                : activity.customTitle || "Custom stop",
           category: activity.category as any,
           startTime: activity.startTime,
           endTime: activity.endTime,
           orderIndex: index,
-          notes: validPoiId || isRest || isTransport
-            ? activity.note
-            : `${activity.note || ""} Unverified AI suggestion.`.trim(),
-          source: activitySource as any,
+          notes: activity.note ?? null,
+          source: source as any,
+          unverifiedClaims: (activity as any).claims ?? null,
         };
       });
 

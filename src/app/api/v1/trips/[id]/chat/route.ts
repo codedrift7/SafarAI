@@ -233,6 +233,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           endTime: typeof tool.args.endTime === "string" ? tool.args.endTime : "11:00",
           orderIndex: day.activities.length,
           addedByUserId: auth.payload.sub,
+          source: poiId ? "catalog" : "ai_generated",
         },
         include: { poi: { include: { region: true } } },
       });

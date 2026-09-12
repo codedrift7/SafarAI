@@ -43,6 +43,7 @@ export async function POST(request: Request) {
       costCurrency: parsed.data.costCurrency ?? "PKR",
       orderIndex,
       addedByUserId: auth.payload.sub,
+      source: parsed.data.poiId ? "catalog" : "user_added",
     },
     include: { poi: { include: { region: true } } },
   });

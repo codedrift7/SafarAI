@@ -155,6 +155,7 @@ async function main() {
               estimatedCost: activity.estimatedCost ?? null,
               costCurrency: activity.costCurrency,
               addedByUserId: activity.addedByUserId ?? null,
+              source: activity.poiId ? "catalog" : "ai_generated",
             })),
           },
         })),

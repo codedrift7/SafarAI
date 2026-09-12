@@ -35,7 +35,21 @@ export class ItineraryGenerationError extends Error {
  * Strategy: extract the arguments JSON, then try to close incomplete structures
  * by trimming back to the last complete activity/day and closing brackets.
  */
-function rescueTruncatedJson(failedGeneration: string): Record<string, unknown> | null {
+export function rescueTruncatedJson(failedGeneration: string): Record<string, unknown> | null {
+  const removeIncompleteTail = (parsed: any): Record<string, unknown> | null => {
+    if (!parsed.days || !Array.isArray(parsed.days) || parsed.days.length === 0) return null;
+    for (const day of parsed.days) {
+      if (!day || !Array.isArray(day.activities)) continue;
+      while (day.activities.length > 0) {
+        const activity = day.activities[day.activities.length - 1];
+        if (typeof activity?.note === "string" && activity.note.trim().length > 0) break;
+        day.activities.pop();
+      }
+    }
+    parsed.days = parsed.days.filter((day: any) => Array.isArray(day?.activities) && day.activities.length > 0);
+    return parsed.days.length > 0 ? parsed : null;
+  };
+
   try {
     // The failed_generation format is: {"name": "generate_itinerary", "arguments": {...}}
     // Extract just the arguments part
@@ -49,7 +63,7 @@ function rescueTruncatedJson(failedGeneration: string): Record<string, unknown> 
 
     // Try parsing as-is first (maybe it's valid)
     try {
-      return JSON.parse(argsStr);
+      return removeIncompleteTail(JSON.parse(argsStr));
     } catch {
       // Expected — it's truncated
     }
@@ -90,8 +104,9 @@ function rescueTruncatedJson(failedGeneration: string): Record<string, unknown> 
     try {
       const parsed = JSON.parse(trimmed);
       if (parsed.days && Array.isArray(parsed.days) && parsed.days.length > 0) {
-        console.log(`[planner] Rescued ${parsed.days.length} days from truncated output`);
-        return parsed;
+        const rescued = removeIncompleteTail(parsed);
+        if (rescued) console.log(`[planner] Rescued ${(rescued.days as unknown[]).length} days from truncated output`);
+        return rescued;
       }
     } catch {
       // Rescue failed
@@ -167,7 +182,7 @@ function systemPrompt(input: PlannerInput): string {
     "Never reuse the same poiId — each POI should appear at most once across the entire trip. Multiple different POIs on the same day is fine and encouraged when they are nearby.",
     "Group nearby POIs together on the same day. Sequence the days and stops in a logical geographic progression (e.g., moving South to North along a valley) using the provided lat/lng coordinates to eliminate backtracking.",
     "Never include Balochistan or former FATA regions.",
-    "If suggesting a non-verified stop, set poiId to null and provide customTitle.",
+    "If suggesting a non-catalogue stop, set poiId to null and provide customTitle and note. Set the claims object to declare any specific checkable claims you assert: placeName=true if asserting a specific venue or business name, address=true if asserting a street address, hours=true if asserting opening/closing hours, and price=true if asserting an entry fee or cost. If suggesting a generic activity (e.g. 'take a short break at a local tea house', 'explore the bazaar'), omit or leave claims false.",
     "If POI requiresPermit=true, mention it in the note.",
     // B3: Reinforce note requirement
     "Every activity MUST have a note field: 1–2 sentences on what the place is and why it is worth stopping. Include a practical tip (fee, permit, road condition, duration) when the data is in the candidate list. Never leave note blank.",
@@ -252,16 +267,15 @@ export async function generateItineraryWithRetry(input: PlannerInput): Promise<G
     .join("\n");
 
   // Dynamic max_tokens: Groq bills (input_tokens + max_tokens) against a hard per-model
-  // ceiling (8 000 for openai/gpt-oss-120b).  Estimate input size at ~1 token per 4 chars,
-  // then compute how much headroom remains — capped at 6 500 so we never request a
-  // completion budget larger than the model can actually fill.
-  //
-  // Example results:
-  //   Hunza (8 POIs,  ~1 200 input tokens) → max_tokens = 6 500  (total ≈ 7 700 ✅)
-  //   All 78 POIs     (~5 800 input tokens) → max_tokens = 2 000  (total ≈ 7 800 ✅)
+  // ceiling (8 000 for openai/gpt-oss-120b).
+  // Estimate input size conservatively at ~3.2 chars per token (accounting for JSON schema,
+  // tools overhead, and formatted candidate list).
+  // Target a combined total <= 7 000 tokens to keep a 1 000 token safety buffer below the 8 000 ceiling.
+  // Completion for multi-day itineraries typically requires 1 000 – 4 500 tokens; cap at 5 000.
   const sysLen = systemPrompt(input).length;
-  const estimatedInputTokens = Math.round((sysLen + userContent.length + 1462 /* tool JSON */) / 4);
-  const dynamicMaxTokens = Math.min(6500, Math.max(1000, 7800 - estimatedInputTokens));
+  const toolJsonLen = JSON.stringify(toolDefinitions).length;
+  const estimatedInputTokens = Math.ceil((sysLen + userContent.length + toolJsonLen) / 3.2);
+  const dynamicMaxTokens = Math.min(5000, Math.max(1000, 7000 - estimatedInputTokens));
   console.log("[planner] token budget", { estimatedInputTokens, dynamicMaxTokens });
 
   let first;
@@ -284,6 +298,40 @@ export async function generateItineraryWithRetry(input: PlannerInput): Promise<G
       message: err?.message,
       model: env.GROQ_MODEL_GENERATION,
     });
+
+    const isTokenLimitExceeded =
+      err?.status === 413 ||
+      err?.code === "rate_limit_exceeded" ||
+      (typeof err?.message === "string" &&
+        (err.message.includes("Request too large") ||
+          err.message.includes("tokens per minute") ||
+          err.message.includes("TPM")));
+
+    if (isTokenLimitExceeded && dynamicMaxTokens > 1200) {
+      const reducedMaxTokens = Math.max(1000, Math.floor(dynamicMaxTokens * 0.5));
+      console.warn(`[planner] 413/TPM limit hit. Retrying with reduced max_tokens: ${reducedMaxTokens}`);
+      try {
+        first = await groqClient.chat.completions.create({
+          model: env.GROQ_MODEL_GENERATION,
+          messages: [
+            { role: "system", content: systemPrompt(input) },
+            { role: "user", content: userContent },
+          ],
+          tools: toolDefinitions as any,
+          tool_choice: { type: "function", function: { name: "generate_itinerary" } },
+          temperature: 0.2,
+          max_tokens: reducedMaxTokens,
+        });
+      } catch (retryErr: any) {
+        throw new ItineraryGenerationError(
+          "Itinerary generation request exceeded model token limits. Try a shorter trip date range or fewer candidate regions.",
+        );
+      }
+    } else if (isTokenLimitExceeded) {
+      throw new ItineraryGenerationError(
+        "Itinerary generation request exceeded model token limits. Try a shorter trip date range or fewer candidate regions.",
+      );
+    }
 
     // When the model runs out of tokens, Groq returns a 400 with the truncated JSON
     // in err.error.failed_generation. Try to rescue it.
@@ -349,6 +397,20 @@ export async function generateItineraryWithRetry(input: PlannerInput): Promise<G
       max_tokens: dynamicMaxTokens, // same budget as first call
     });
   } catch (err: any) {
+    const isTokenLimitExceeded =
+      err?.status === 413 ||
+      err?.code === "rate_limit_exceeded" ||
+      (typeof err?.message === "string" &&
+        (err.message.includes("Request too large") ||
+          err.message.includes("tokens per minute") ||
+          err.message.includes("TPM")));
+
+    if (isTokenLimitExceeded) {
+      throw new ItineraryGenerationError(
+        "Itinerary generation request exceeded model token limits on retry. Try a shorter trip date range.",
+      );
+    }
+
     // Same rescue logic for retry
     if (err?.status === 400 && err?.error?.failed_generation) {
       console.log("[planner] Retry truncated — attempting rescue...");

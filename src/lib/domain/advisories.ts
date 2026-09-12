@@ -1,5 +1,6 @@
 import type { Activity, Advisory, POI, Trip } from "@/lib/domain/types";
 import { seasonsForRange } from "./season";
+import { classifyActivity } from "./classification";
 
 /**
  * Canonical advisory computation. Previously duplicated between src/server/advisories.ts
@@ -110,20 +111,40 @@ export function getActivityAdvisories(
   startDate: string,
   endDate: string,
 ): Advisory[] {
-  if (!activity.poi) {
-    return [
-      {
-        id: `unverified-${activity.id}`,
-        type: "UNVERIFIED",
-        severity: "info",
-        title: "AI suggestion, unverified",
-        message:
-          "This is a custom itinerary suggestion, not a place from SafarAI's verified POI catalogue. Confirm details locally before relying on it.",
-        activityId: activity.id,
-      },
-    ];
+  const classification = classifyActivity(activity);
+
+  if (classification.status === "verified") {
+    return activity.poi ? getPoiAdvisories(activity.poi, startDate, endDate, activity.id) : [];
   }
-  return getPoiAdvisories(activity.poi, startDate, endDate, activity.id);
+
+  // 'custom' user-authored items and 'ai_generic' suggestions get no caution callout
+  if (classification.status === "custom" || classification.status === "ai_generic") {
+    return [];
+  }
+
+  // 'ai_unverified' (Tier 3): unverified AI suggestion asserting checkable claims
+  const claimLabels: Record<string, string> = {
+    price: "price",
+    hours: "hours",
+    address: "address",
+    place_name: "venue name",
+  };
+  const claimDescriptions = classification.claims.map((c: string) => claimLabels[c] ?? c);
+  const claimsSuffix =
+    claimDescriptions.length > 0 ? ` (includes unverified ${claimDescriptions.join(", ")})` : "";
+
+  return [
+    {
+      id: `unverified-${activity.id}`,
+      type: "UNVERIFIED",
+      severity: "info",
+      title: "AI suggestion, unverified",
+      message: `This is a custom itinerary suggestion, not a place from SafarAI's verified POI catalogue${claimsSuffix}. Confirm details locally before relying on it.`,
+      activityId: activity.id,
+      isHighStakes: classification.isHighStakes,
+      claims: classification.claims,
+    },
+  ];
 }
 
 export function getTripAdvisories(trip: Trip): Advisory[] {

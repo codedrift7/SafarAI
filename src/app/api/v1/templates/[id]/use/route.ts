@@ -58,6 +58,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               estimatedCost: activity.estimatedCost ?? null,
               costCurrency: activity.costCurrency ?? "PKR",
               orderIndex: activityIndex,
+              source: "catalog",
             })),
           },
         })),

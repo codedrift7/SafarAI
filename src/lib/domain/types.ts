@@ -131,6 +131,30 @@ export interface POI {
   verifiedAt?: ISODateString | null;
 }
 
+export type ActivitySource = "catalog" | "ai_generated" | "user_added";
+
+export interface ActivityClaims {
+  placeName?: boolean;
+  address?: boolean;
+  hours?: boolean;
+  price?: boolean;
+}
+
+export type ActivityVerificationStatus =
+  | "verified"
+  | "custom"
+  | "ai_generic"
+  | "ai_unverified";
+
+export interface ActivityClassification {
+  status: ActivityVerificationStatus;
+  tier: 1 | 2 | 3;
+  source: ActivitySource;
+  isCustom: boolean;
+  isHighStakes: boolean;
+  claims: string[];
+}
+
 export interface Activity {
   id: string;
   tripDayId: string;
@@ -146,6 +170,8 @@ export interface Activity {
   estimatedCost?: number | null;
   costCurrency: string;
   addedByUserId?: string | null;
+  source?: ActivitySource;
+  unverifiedClaims?: ActivityClaims | null;
 }
 
 export interface TripDay {
@@ -285,6 +311,8 @@ export interface Advisory {
   poiId?: string;
   officialLink?: string;
   lastVerifiedAt?: ISODateString;
+  isHighStakes?: boolean;
+  claims?: string[];
 }
 
 export interface POIFilters {

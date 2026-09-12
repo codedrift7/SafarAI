@@ -198,15 +198,16 @@ model Activity {
   estimatedCost Float?
   costCurrency  String           @default("PKR")
   addedByUserId String?
-  source        ActivitySource   @default(model)
+  source           ActivitySource   @default(ai_generated)
+  unverifiedClaims Json?
 
   votes ActivityVote[]
 }
 
 enum ActivitySource {
-  model
-  auto_fill
-  routing    // TRANSPORT activities inserted by the OSRM routing layer (routing.ts)
+  catalog
+  ai_generated
+  user_added
 }
 
 model ActivityVote {

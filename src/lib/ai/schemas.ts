@@ -19,6 +19,14 @@ export const itineraryActivitySchema = z.object({
   endTime: z.string().regex(timeRegex),
   // B3: note is required and must be non-empty — no more silent empty strings
   note: z.string().min(1),
+  claims: z
+    .object({
+      placeName: z.boolean().optional(),
+      address: z.boolean().optional(),
+      hours: z.boolean().optional(),
+      price: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 export const itineraryDaySchema = z.object({
@@ -81,6 +89,17 @@ export const toolDefinitions = [
                         description:
                           "1–2 sentences: what the place is and why it is worth the stop. " +
                           "Add a practical tip (fee, permit, duration, safety note) when available. Required.",
+                      },
+                      claims: {
+                        type: "object",
+                        description:
+                          "For non-catalogue stops (when poiId is omitted), indicate which specific claims are asserted.",
+                        properties: {
+                          placeName: { type: "boolean", description: "True if asserting a specific venue or business name" },
+                          address: { type: "boolean", description: "True if asserting a specific street address" },
+                          hours: { type: "boolean", description: "True if asserting opening/closing hours" },
+                          price: { type: "boolean", description: "True if asserting a specific price or entry fee" },
+                        },
                       },
                     },
                     required: ["category", "startTime", "endTime", "note"],

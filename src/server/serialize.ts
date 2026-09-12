@@ -77,7 +77,8 @@ function toActivity(activity: any): Activity {
     estimatedCost: activity.estimatedCost,
     costCurrency: activity.costCurrency,
     addedByUserId: activity.addedByUserId,
-    source: activity.source ?? "model",
+    source: activity.source ?? (activity.poiId ? "catalog" : activity.addedByUserId ? "user_added" : "ai_generated"),
+    unverifiedClaims: activity.unverifiedClaims ?? null,
   } as Activity;
 }
 
