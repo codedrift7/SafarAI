@@ -79,12 +79,43 @@ function detectClaimsViaRegex(
 }
 
 /**
+ * Detects whether an activity represents a named market, bazaar, shopping venue,
+ * or general public stop/break that has no entry fee or paid ticket attached.
+ * Such stops are treated as Tier 2 ('ai_generic') to prevent warning fatigue.
+ */
+function isNamedMarketOrStopWithoutFee(activity: Activity): boolean {
+  const combinedText = `${activity.customTitle ?? ""} ${activity.notes ?? ""}`.trim();
+
+  // If there's an explicit price/fee claim or non-zero estimated cost, it has a fee
+  if (activity.estimatedCost != null && activity.estimatedCost > 0) return false;
+  if (PRICE_PATTERNS.some((pattern) => pattern.test(combinedText))) return false;
+  if (activity.unverifiedClaims?.price) return false;
+
+  // If an explicit street address with street number is given, it's not a generic market/stop
+  if (ADDRESS_PATTERNS.some((pattern) => pattern.test(combinedText))) return false;
+
+  // Check if it's a market, shopping venue, bazaar, mall
+  const isMarket =
+    activity.category === "SHOPPING" ||
+    /\b(market|bazaar|bazar|mandi|souk|shopping|mall|arcade|emporium)\b/i.test(combinedText);
+
+  // Check if it's a stop / rest / viewpoint / park / walk
+  const isStop =
+    activity.category === "REST" ||
+    activity.category === "TRANSPORT" ||
+    /\b(stop|break|viewpoint|lookout|park|garden|walk|stroll|promenade)\b/i.test(combinedText);
+
+  return isMarket || isStop;
+}
+
+/**
  * Classifies an itinerary activity into the three-tier verification system.
  *
  * Tiers:
  * - Tier 1 ('verified'): Linked to verified catalogue POI or curated template editorial stop.
  * - 'custom': Human-authored item with no catalogue link (source === 'user_added').
- * - Tier 2 ('ai_generic'): AI-generated stop with no checkable claims asserted.
+ * - Tier 2 ('ai_generic'): AI-generated stop with no checkable claims asserted,
+ *   or named markets and stops without entry fees.
  * - Tier 3 ('ai_unverified'): AI-generated stop asserting specific checkable claims.
  */
 export function classifyActivity(activity: Activity): ActivityClassification {
@@ -111,6 +142,18 @@ export function classifyActivity(activity: Activity): ActivityClassification {
       tier: 2,
       source: "user_added",
       isCustom: true,
+      isHighStakes: false,
+      claims: [],
+    };
+  }
+
+  // Named markets, bazaars, and stops without entry fees resolve to Tier 2 ('ai_generic')
+  if (isNamedMarketOrStopWithoutFee(activity)) {
+    return {
+      status: "ai_generic",
+      tier: 2,
+      source: "ai_generated",
+      isCustom: false,
       isHighStakes: false,
       claims: [],
     };

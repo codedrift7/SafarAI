@@ -217,4 +217,59 @@ describe("Three-Tier Itinerary Item Verification & Classification", () => {
     const advisories = getActivityAdvisories(activity, "2026-06-01", "2026-06-10");
     assert.equal(advisories.length, 0);
   });
+
+  it("Named market without entry fees ('Liberty Market') resolves to Tier 2 (ai_generic) with no caution callout", () => {
+    const activity: Activity = {
+      id: "act-liberty-market",
+      tripDayId: "day-1",
+      poiId: null,
+      customTitle: "Liberty Market",
+      notes: "Shop for souvenirs, fabrics and local crafts at Liberty Market. Open 10 am-9 pm; budget time for bargaining.",
+      category: "SHOPPING",
+      orderIndex: 3,
+      costCurrency: "PKR",
+      source: "ai_generated",
+      unverifiedClaims: {
+        placeName: true,
+        hours: true,
+        address: true,
+      },
+    };
+
+    const result = classifyActivity(activity);
+    assert.equal(result.tier, 2);
+    assert.equal(result.status, "ai_generic");
+    assert.equal(result.isHighStakes, false);
+
+    const advisories = getActivityAdvisories(activity, "2026-06-01", "2026-06-10");
+    assert.equal(advisories.length, 0);
+  });
+
+  it("Named market WITH entry fee resolves to Tier 3 (ai_unverified, high-stakes)", () => {
+    const activity: Activity = {
+      id: "act-market-with-fee",
+      tripDayId: "day-1",
+      poiId: null,
+      customTitle: "Craft Expo Market",
+      notes: "Annual crafts exhibition with entry fee 500 PKR. Open 10am-8pm.",
+      category: "SHOPPING",
+      orderIndex: 4,
+      costCurrency: "PKR",
+      source: "ai_generated",
+      unverifiedClaims: {
+        placeName: true,
+        price: true,
+        hours: true,
+      },
+    };
+
+    const result = classifyActivity(activity);
+    assert.equal(result.tier, 3);
+    assert.equal(result.status, "ai_unverified");
+    assert.equal(result.isHighStakes, true);
+
+    const advisories = getActivityAdvisories(activity, "2026-06-01", "2026-06-10");
+    assert.equal(advisories.length, 1);
+    assert.equal(advisories[0].type, "UNVERIFIED");
+  });
 });
